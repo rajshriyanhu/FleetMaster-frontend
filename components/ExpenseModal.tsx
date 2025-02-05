@@ -72,8 +72,8 @@ const ExpenseModal = ({
     useUpdateExpense();
   const uploadFile = useFileUpload();
 
-  const [rc, setRc] = useState<File | null>(null);
-  const rcInputRef = useRef<HTMLInputElement>(null);
+  const [document, setDocument] = useState<File | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<expenseFormType>({
     resolver: zodResolver(expenseFormSchema()),
@@ -93,14 +93,15 @@ const ExpenseModal = ({
     }
   }, [expense, form]);
 
-  const onSubmit = (data: expenseFormType) => {
-    if (!rc) {
+  const onSubmit = async (data: expenseFormType) => {
+    if (!document) {
       return;
     }
     const uniqueId = uuidv4();
-    uploadFile(`${rc.name}_${uniqueId}`, rc)
-      .then(() => {
-        form.setValue("file_url", `${rc.name}_${uniqueId}`);
+    const fileName = `${document.name}_${uniqueId}`;
+    uploadFile(fileName, document)
+      .then((res) => {
+          form.setValue("file_url", res.filename);
       })
       .catch((err) => {
         toast({
@@ -110,7 +111,7 @@ const ExpenseModal = ({
         return;
       });
     const request: CreateExpenseRequest = {
-      name: data.type,
+      name: fileName,
       description: data.description,
       type: data.type,
       amount: data.amount,
@@ -119,7 +120,7 @@ const ExpenseModal = ({
       chassis_no: vehicle.chassis_no,
     };
     if (expense) {
-      updateExpense({ id: expense.id, values: request })
+      await updateExpense({ id: expense.id, values: request })
         .then(() => {
           toast({
             title: "Expense details saved successfully",
@@ -135,7 +136,7 @@ const ExpenseModal = ({
         });
       return;
     }
-    createExpense(request)
+    await createExpense(request)
       .then(() => {
         toast({
           title: "Expense added successfully",
@@ -180,10 +181,7 @@ const ExpenseModal = ({
     }
   };
 
-  const handleFileUpload = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    type: string
-  ) => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !e.target.files[0]) {
       toast({
         title: "Failed to upload file",
@@ -195,7 +193,7 @@ const ExpenseModal = ({
     uploadFile(`${vehicle.rc_url}`, e.target.files[0])
       .then(() => {
         toast({
-          title: "RC uploaded successfully!",
+          title: "File uploaded successfully!",
         });
       })
       .catch((err) => {
@@ -207,6 +205,8 @@ const ExpenseModal = ({
         return;
       });
   };
+
+  console.log(document);
 
   return (
     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -325,19 +325,19 @@ const ExpenseModal = ({
                   <FormLabel>Amount of Expense (₹)</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="3000"
                       className="shad-input"
                       {...field}
-                      value={
-                        field.value !== undefined && field.value !== null
-                          ? `₹${new Intl.NumberFormat("en-IN").format(field.value)}`
-                          : ""
+                      value={field.value !== undefined && field.value !== null
+                        ? `₹${new Intl.NumberFormat("en-IN").format(field.value)}`
+                        : ""
                       }
                       onChange={(e) => {
-                        const value = e.target.value.replace(/₹|,/g, "");
-                        field.onChange(
-                          value === "" ? undefined : Number(value)
-                        );
+                        let value = e.target.value.replace(/₹|,/g, ""); // Remove ₹ and commas
+                        if (value === "" || isNaN(Number(value))) {
+                          field.onChange(""); // Allow empty input instead of NaN
+                        } else {
+                          field.onChange(Number(value));
+                        }
                       }}
                     />
                   </FormControl>
@@ -399,19 +399,24 @@ const ExpenseModal = ({
                 <div>Document</div>
                 <div className="flex justify-between">
                   <Button
-                    onClick={() => downloadFile(vehicle.insurance_url)}
+                    onClick={() => downloadFile(expense.name)}
                     variant="ghost"
                     className="text-lg font-semibold"
+                    type="button"
                   >
                     View
                   </Button>
-                  <Button variant="ghost" className="text-lg font-semibold">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="text-lg font-semibold"
+                  >
                     <div className="flex items-center justify-between gap-2">
                       <Input
                         id="upload"
                         className="hidden"
                         type="file"
-                        onChange={(e) => handleFileUpload(e, "insurance")}
+                        onChange={(e) => handleFileUpload(e)}
                       />
                       <label
                         htmlFor="upload"
@@ -432,33 +437,33 @@ const ExpenseModal = ({
                 </FormLabel>
                 <div className="flex items-center justify-between gap-2">
                   <Input
-                    id="rc-upload"
+                    id="doc-upload"
                     className="hidden"
                     type="file"
-                    ref={rcInputRef}
-                    onChange={(e) =>
-                      setRc(e.target.files ? e.target.files[0] : null)
-                    }
+                    ref={inputRef}
+                    onChange={(e) => {
+                      setDocument(e.target.files ? e.target.files[0] : null);
+                    }}
                   />
                   <label
-                    htmlFor="rc-upload"
+                    htmlFor="doc-upload"
                     className="rounded-md border px-2 py-[5px] w-full flex items-center gap-4 cursor-pointer"
                   >
-                    {rc ? (
-                      `${rc.name}`
+                    {document ? (
+                      `${document.name}`
                     ) : (
                       <div className="w-full flex items-center justify-between gap-2">
                         Click here to upload <Upload />
                       </div>
                     )}
                   </label>
-                  {rc && (
+                  {document && (
                     <Trash2
                       className="cursor-pointer"
                       onClick={() => {
-                        setRc(null);
-                        if (rcInputRef.current) {
-                          rcInputRef.current.value = "";
+                        setDocument(null);
+                        if (inputRef.current) {
+                          inputRef.current.value = "";
                         }
                       }}
                     />

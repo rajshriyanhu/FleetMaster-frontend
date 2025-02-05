@@ -71,7 +71,9 @@ const AllExpenseTable = () => {
         <TableHeader className="bg-white py-4">
           <TableRow>
             <TableHead className="font-semibold text-black">No.</TableHead>
-            <TableHead className="font-semibold text-black">Name</TableHead>
+            <TableHead className="font-semibold text-black">
+              Expense Type
+            </TableHead>
             <TableHead className="font-semibold text-black">
               Description
             </TableHead>
@@ -79,9 +81,7 @@ const AllExpenseTable = () => {
               Expense Date
             </TableHead>
             <TableHead className="font-semibold text-black">Amount</TableHead>
-            <TableHead className="font-semibold text-black">
-              Expense Type
-            </TableHead>
+            
             <TableHead className="font-semibold text-black"></TableHead>
           </TableRow>
         </TableHeader>
@@ -90,13 +90,12 @@ const AllExpenseTable = () => {
             return (
               <TableRow className="h-16" key={expense.id}>
                 <TableCell>{index + 1}</TableCell>
-                <TableCell>{expense.name}</TableCell>
+                <TableCell>{expense.type}</TableCell>
                 <TableCell className="max-w-[200px]">
                   {expense.description}
                 </TableCell>
                 <TableCell>{convertTimestampToDate(expense.date)}</TableCell>
                 <TableCell>{expense.amount}</TableCell>
-                <TableCell>{expense.type}</TableCell>
                 <TableCell onClick={() => {}} className=" cursor-pointer">
                   <DropdownMenu>
                     <DropdownMenuTrigger className="flex items-center gap-2 px-4 py-2">
