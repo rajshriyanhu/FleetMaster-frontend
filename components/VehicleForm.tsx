@@ -196,9 +196,10 @@ const VehicleForm = ({
     for (let i = 0; i < 4; i++) {
       const uniqueId = uuidv4();
       if (i === 0) {
-        uploadFile(`${rc.name}_${uniqueId}`, rc)
+        const fileName = `${uniqueId}_${rc.name}`;
+        await uploadFile(fileName, rc)
           .then(() => {
-            form.setValue("rc_url", `${rc.name}_${uniqueId}`);
+            form.setValue("rc_url", fileName);
           })
           .catch((err) => {
             toast({
@@ -209,9 +210,10 @@ const VehicleForm = ({
           });
       }
       if (i === 1) {
-        uploadFile(`${insurance.name}_${uniqueId}`, insurance)
+        const fileName = `${uniqueId}_${insurance.name}`
+        await uploadFile(fileName, insurance)
           .then(() => {
-            form.setValue("insurance_url", `${insurance.name}_${uniqueId}`);
+            form.setValue("insurance_url", fileName);
           })
           .catch((err) => {
             toast({
@@ -222,9 +224,10 @@ const VehicleForm = ({
           });
       }
       if (i === 2) {
-        uploadFile(`${puc.name}_${uniqueId}`, puc)
+        const fileName = `${uniqueId}_${puc.name}`
+        await uploadFile(fileName, puc)
           .then(() => {
-            form.setValue("puc_url", `${puc.name}_${uniqueId}`);
+            form.setValue("puc_url", fileName);
           })
           .catch((err) => {
             toast({
@@ -235,9 +238,10 @@ const VehicleForm = ({
           });
       }
       if (i === 3) {
-        uploadFile(`${fitness.name}_${uniqueId}`, fitness)
+        const fileName = `${uniqueId}_${fitness.name}`
+        await uploadFile(fileName, fitness)
           .then(() => {
-            form.setValue("fitness_url", `${fitness.name}_${uniqueId}`);
+            form.setValue("fitness_url", fileName);
           })
           .catch((err) => {
             toast({
@@ -253,10 +257,8 @@ const VehicleForm = ({
       title: "All documents uploaded Successfully!",
     });
 
-    console.log(values);
-
     if (vehicle) {
-      updateVehicle({ id: vehicle.id, values })
+      await updateVehicle({ id: vehicle.id, values })
         .then(() => {
           toast({
             title: "Vehicle details saved successfully",
@@ -271,7 +273,7 @@ const VehicleForm = ({
         });
       return;
     }
-    createVehicle(values)
+    await createVehicle(values)
       .then(() => {
         toast({
           title: "Vehicle created successfully",

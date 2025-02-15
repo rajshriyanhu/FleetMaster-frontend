@@ -98,7 +98,7 @@ const ExpenseModal = ({
       return;
     }
     const uniqueId = uuidv4();
-    const fileName = `${document.name}_${uniqueId}`;
+    const fileName = `${uniqueId}_${document.name}`;
     uploadFile(fileName, document)
       .then((res) => {
           form.setValue("file_url", res.filename);
