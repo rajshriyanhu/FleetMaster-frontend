@@ -21,7 +21,8 @@ const Sidebar = () => {
   const getActiveClass = (url: string) => {
     const cleanPathname = pathname.split("?")[0];
     const cleanUrl = url.split("?")[0];
-    return cleanPathname === cleanUrl;
+    if(cleanUrl === '/')return cleanUrl === cleanPathname;
+    return cleanPathname.includes(cleanUrl);
   };
 
   return (

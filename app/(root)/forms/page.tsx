@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Accordion,
@@ -20,12 +20,32 @@ import LumpsumBookingForm from "@/components/forms/LumpsumBookingForm";
 import OutstationBillingForm from "@/components/forms/OutstationBillingForm";
 import LumpsumBillingForm from "@/components/forms/LumpsumBillingForm";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useHeader } from "@/hooks/use-header";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb";
 
 const FormPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab");
   const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
+  const { setTitle } = useHeader();
+
+  useEffect(() => {
+    setTitle(
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbPage>Forms</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+    );
+  }, []);
 
   const setTab = (newTab : string) => {
     const params = new URLSearchParams(searchParams); 

@@ -30,7 +30,9 @@ import { useLocalQuotationImage } from "@/hooks/use-form-hook";
 import { useEffect, useState } from "react";
 import {
   costExtraHr,
+  costExtraHrMap,
   costExtraKm,
+  costExtraKmMap,
   kmMap,
   packageOptions,
   passengerCapacity,
@@ -71,6 +73,8 @@ const LocalQuotationForm = () => {
       km_limit: "",
       end_date_time: "",
       total: undefined,
+      cost_extra_hr: "",
+      cost_extra_km: "",
     },
   });
 
@@ -100,8 +104,10 @@ const LocalQuotationForm = () => {
     form.setValue("km_limit", kmMap[value]);
   };
 
+  
   const totalApproxCost = form.watch("total");
   const capacity = form.watch("passenger");
+  const vehicleName = form.watch("vehicle");
 
   useEffect(() => {
     if (totalApproxCost) {
@@ -116,7 +122,17 @@ const LocalQuotationForm = () => {
     } else if (capacity && capacity === passengerCapacity[0]) {
       setNewVehicleArray(vehicle);
     }
-  }, [totalApproxCost, capacity, form]);
+    if (vehicleName) {
+      const hrValue = costExtraHrMap[vehicleName];
+      const kmValue = costExtraKmMap[vehicleName];
+      form.setValue("cost_extra_hr", hrValue.toString());
+
+      form.setValue("cost_extra_km", kmValue.toString(), {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+  }, [totalApproxCost, capacity, vehicleName, form]);
 
   return (
     <>
@@ -442,15 +458,13 @@ const LocalQuotationForm = () => {
                 </FormLabel>
                 <FormControl>
                   <Select
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                    }}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
                   >
-                    <FormControl>
-                      <SelectTrigger className="bg-white">
-                        <SelectValue placeholder="Select cost per extra hr" />
-                      </SelectTrigger>
-                    </FormControl>
+                    <SelectTrigger className="bg-white">
+                      <SelectValue placeholder="Select cost per extra hr" />
+                    </SelectTrigger>
                     <SelectContent>
                       {costExtraHr.map((option) => (
                         <SelectItem key={option} value={option.toString()}>
@@ -475,15 +489,13 @@ const LocalQuotationForm = () => {
                 </FormLabel>
                 <FormControl>
                   <Select
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                    }}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
                   >
-                    <FormControl>
-                      <SelectTrigger className="bg-white">
-                        <SelectValue placeholder="Select cost per extra KM" />
-                      </SelectTrigger>
-                    </FormControl>
+                    <SelectTrigger className="bg-white">
+                      <SelectValue placeholder="Select cost per extra KM" />
+                    </SelectTrigger>
                     <SelectContent>
                       {costExtraKm.map((option) => (
                         <SelectItem key={option} value={option.toString()}>

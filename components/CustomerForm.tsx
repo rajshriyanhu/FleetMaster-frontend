@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { indianStates } from "@/constants";
+import { useRouter } from "next/navigation";
 
 const customerFormSchema = () => {
   return z.object({
@@ -47,6 +48,7 @@ export type CustomerFormType = z.infer<ReturnType<typeof customerFormSchema>>;
 
 const CustomerForm = ({ user }: { user?: Customer }) => {
   const { toast } = useToast();
+  const router = useRouter();
   const { mutateAsync: createCustomer, isPending } = useCreateCustomer();
   const { mutateAsync: updateCustomer, isPending: isUpdatingCustomer } =
     useUpdateCustomer();
@@ -82,6 +84,8 @@ const CustomerForm = ({ user }: { user?: Customer }) => {
           toast({
             title: "Customer details saved successfully",
           });
+          form.reset();
+          router.push('/customers?page=1&limit=10')
         })
         .catch((err) => {
           toast({
@@ -97,6 +101,8 @@ const CustomerForm = ({ user }: { user?: Customer }) => {
         toast({
           title: "Customer added successfully",
         });
+        form.reset();
+          router.push('/customers?page=1&limit=10')
       })
       .catch((err) => {
         toast({

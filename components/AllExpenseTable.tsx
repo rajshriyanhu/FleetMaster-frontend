@@ -25,6 +25,8 @@ import { Pencil1Icon } from "@radix-ui/react-icons";
 import ExpenseModal from "./ExpenseModal";
 import { useGetVehicleById } from "@/hooks/use-vehicle-hook";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "./ui/button";
+import { downloadFile } from "@/hooks/use-fle-donwload";
 
 const AllExpenseTable = () => {
   const params = useParams();
@@ -81,8 +83,9 @@ const AllExpenseTable = () => {
               Expense Date
             </TableHead>
             <TableHead className="font-semibold text-black">Amount</TableHead>
+            <TableHead className="font-semibold text-black">Document</TableHead>
             
-            <TableHead className="font-semibold text-black"></TableHead>
+            <TableHead className="font-semibold text-black">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -96,6 +99,7 @@ const AllExpenseTable = () => {
                 </TableCell>
                 <TableCell>{convertTimestampToDate(expense.date)}</TableCell>
                 <TableCell>{expense.amount}</TableCell>
+                <TableCell><Button onClick={() => downloadFile(expense.name)}>View</Button></TableCell>
                 <TableCell onClick={() => {}} className=" cursor-pointer">
                   <DropdownMenu>
                     <DropdownMenuTrigger className="flex items-center gap-2 px-4 py-2">

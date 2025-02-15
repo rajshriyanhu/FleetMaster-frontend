@@ -1,4 +1,3 @@
-import { useGetAllDrivers } from "@/hooks/use-driver-hook";
 import { useRouter } from "next/navigation";
 import React from "react";
 import {
@@ -13,15 +12,16 @@ import {
 import { Driver } from "@/dto";
 import { convertTimestampToDate } from "@/utils";
 
-const AllDriverTable = () => {
+const AllDriverTable = ({
+  drivers,
+  isLoading,
+}: {
+  drivers: Driver[] | null;
+  isLoading: boolean;
+}) => {
   const router = useRouter();
-  const { data, isLoading } = useGetAllDrivers();
 
-  console.log(data);
-
-  if (isLoading || !data) return <>Loading</>;
-
-  const drivers = data.drivers;
+  if (isLoading || !drivers) return <>Loading</>;
 
   return (
     <Table>
@@ -52,7 +52,7 @@ const AllDriverTable = () => {
             <TableRow
               className="h-16 cursor-pointer"
               key={driver.id}
-              // onClick={() => router.push(`/driver/${driver.id}`)}
+              onClick={() => router.push(`/drivers/${driver.id}`)}
             >
               <TableCell>{index + 1}</TableCell>
               <TableCell>{driver.name}</TableCell>

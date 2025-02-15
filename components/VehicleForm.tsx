@@ -75,11 +75,11 @@ const vehicleFormSchema = () => {
       fitness_validity: z.date(),
       fitness_url: z.string().optional(),
       last_battery_change: z.date().optional(),
-      last_service: z.date(),
+      last_service: z.date().optional(),
       last_service_kms: z.number(),
       next_service_due: z.date(),
       next_service_due_kms: z.number(),
-      gps_renewal_due: z.date(),
+      gps_renewal_due: z.date().optional(),
     })
     .refine((data) => data.next_service_due_kms > data.last_service_kms, {
       message: "Next service due kms must be greater than last service kms.",
@@ -186,107 +186,87 @@ const VehicleForm = ({
   console.log(form.formState.errors);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    setErrorMessage("");
-    console.log(values);
-    if (!rc || !puc || !insurance || !fitness) {
-      setErrorMessage("File not uploaded");
-      return;
-    }
+    try {
+      setErrorMessage("");
+      
+      if (!vehicle && (!rc || !puc || !insurance || !fitness)) {
+        setErrorMessage("Please upload all required documents");
+        return;
+      }
 
-    for (let i = 0; i < 4; i++) {
-      const uniqueId = uuidv4();
-      if (i === 0) {
-        const fileName = `${uniqueId}_${rc.name}`;
-        await uploadFile(fileName, rc)
-          .then(() => {
-            form.setValue("rc_url", fileName);
-          })
-          .catch((err) => {
-            toast({
-              title: "Failed to upload RC",
-              variant: "destructive",
-            });
-            return;
-          });
-      }
-      if (i === 1) {
-        const fileName = `${uniqueId}_${insurance.name}`
-        await uploadFile(fileName, insurance)
-          .then(() => {
-            form.setValue("insurance_url", fileName);
-          })
-          .catch((err) => {
-            toast({
-              title: "Failed to upload Insurance",
-              variant: "destructive",
-            });
-            return;
-          });
-      }
-      if (i === 2) {
-        const fileName = `${uniqueId}_${puc.name}`
-        await uploadFile(fileName, puc)
-          .then(() => {
-            form.setValue("puc_url", fileName);
-          })
-          .catch((err) => {
-            toast({
-              title: "Failed to upload PUC",
-              variant: "destructive",
-            });
-            return;
-          });
-      }
-      if (i === 3) {
-        const fileName = `${uniqueId}_${fitness.name}`
-        await uploadFile(fileName, fitness)
-          .then(() => {
-            form.setValue("fitness_url", fileName);
-          })
-          .catch((err) => {
-            toast({
-              title: "Failed to upload Fitness",
-              variant: "destructive",
-            });
-            return;
-          });
-      }
-    }
+      if (!vehicle) {
+        const uploadPromises = [];
+        
+        if (rc) {
+          const rcFileName = `${uuidv4()}_${rc.name}`;
+          uploadPromises.push(
+            uploadFile(rcFileName, rc)
+              .then(() => {
+                values.rc_url = rcFileName;
+              })
+          );
+        }
 
-    toast({
-      title: "All documents uploaded Successfully!",
-    });
+        if (insurance) {
+          const insuranceFileName = `${uuidv4()}_${insurance.name}`;
+          uploadPromises.push(
+            uploadFile(insuranceFileName, insurance)
+              .then(() => {
+                values.insurance_url = insuranceFileName;
+              })
+          );
+        }
 
-    if (vehicle) {
-      await updateVehicle({ id: vehicle.id, values })
-        .then(() => {
-          toast({
-            title: "Vehicle details saved successfully",
-          });
-        })
-        .catch((err) => {
-          toast({
-            title: "Uh Oh! Something went wrong",
-            description: `Failed to upload vehicle data, ${err.message}`,
-            variant: "destructive",
-          });
-        });
-      return;
-    }
-    await createVehicle(values)
-      .then(() => {
+        if (puc) {
+          const pucFileName = `${uuidv4()}_${puc.name}`;
+          uploadPromises.push(
+            uploadFile(pucFileName, puc)
+              .then(() => {
+                values.puc_url = pucFileName;
+              })
+          );
+        }
+
+        if (fitness) {
+          const fitnessFileName = `${uuidv4()}_${fitness.name}`;
+          uploadPromises.push(
+            uploadFile(fitnessFileName, fitness)
+              .then(() => {
+                values.fitness_url = fitnessFileName;
+              })
+          );
+        }
+
+        // Wait for all uploads to complete
+        await Promise.all(uploadPromises);
+        
         toast({
-          title: "Vehicle created successfully",
+          title: "All documents uploaded Successfully!",
         });
-        router.push("/vehicle");
-      })
-      .catch((err) => {
+      }
+
+      // Now submit the form
+      if (vehicle) {
+        await updateVehicle({ id: vehicle.id, values });
         toast({
-          title: "Uh Oh! Something went wrong",
-          description: `Failed to upload vehicle data, ${err.message}`,
-          variant: "destructive",
+          title: "Vehicle details saved successfully",
         });
+        return;
+      }
+
+      await createVehicle(values);
+      toast({
+        title: "Vehicle created successfully",
       });
+      router.push("/vehicle");
+
+    } catch (error) {
+      toast({
+        title: "Uh Oh! Something went wrong",
+        description: `Failed to save vehicle data: ${error}`,
+        variant: "destructive",
+      });
+    }
   };
 
   const lastServiceKM = form.watch("last_service_kms");
@@ -744,7 +724,7 @@ const VehicleForm = ({
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           captionLayout="dropdown-buttons"
-                          fromDate={form.getValues("manufacturing_date")}
+                          fromDate={form.getValues("manufacturing_date") || new Date(2000, 0, 1)}
                           toYear={2100}
                           mode="single"
                           selected={field.value}
@@ -832,7 +812,7 @@ const VehicleForm = ({
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           captionLayout="dropdown-buttons"
-                          fromDate={form.getValues("registration_date")}
+                          fromDate={form.getValues("registration_date") || new Date(2000, 0, 1)}
                           toYear={2100}
                           mode="single"
                           selected={field.value}
@@ -920,7 +900,7 @@ const VehicleForm = ({
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           captionLayout="dropdown-buttons"
-                          fromDate={form.getValues("registration_date")}
+                          fromDate={form.getValues("registration_date") || new Date(2000, 0, 1)}
                           toYear={2100}
                           mode="single"
                           selected={field.value}
@@ -1008,7 +988,7 @@ const VehicleForm = ({
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           captionLayout="dropdown-buttons"
-                          fromDate={form.getValues("registration_date")}
+                          fromDate={form.getValues("registration_date") || new Date(2000, 0, 1)}
                           toYear={2100}
                           mode="single"
                           selected={field.value}
@@ -1074,7 +1054,7 @@ const VehicleForm = ({
               <FormItem className="flex flex-col">
                 <div className="shad-form-item">
                   <FormLabel className="shad-form-label">
-                    Last Battery change date
+                    Last Battery change date (Optional)
                   </FormLabel>
                   <div className="w-full border rounded-md">
                     <Popover
@@ -1122,7 +1102,7 @@ const VehicleForm = ({
               <FormItem className="flex flex-col">
                 <div className="shad-form-item">
                   <FormLabel className="shad-form-label">
-                    Last Service date
+                    Last Service date (Optional)
                   </FormLabel>
                   <div className="w-full border rounded-md">
                     <Popover
@@ -1219,9 +1199,9 @@ const VehicleForm = ({
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
+                      <Calendar
                           captionLayout="dropdown-buttons"
-                          fromDate={form.getValues("last_service")}
+                          fromDate={form.getValues("last_service") || new Date(2000, 0, 1)}
                           toYear={2100}
                           mode="single"
                           selected={field.value}
@@ -1275,7 +1255,7 @@ const VehicleForm = ({
               <FormItem className="flex flex-col">
                 <div className="shad-form-item">
                   <FormLabel className="shad-form-label">
-                    GPS Subscription Renewal Due Date
+                    GPS Subscription Renewal Date (Optional)
                   </FormLabel>
                   <div className="w-full border rounded-md">
                     <Popover

@@ -1,6 +1,7 @@
 import { CustomerFormType } from "@/components/CustomerForm";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import { useDebounce } from "./use-debounce";
 
 axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
 axios.defaults.withCredentials = true;
@@ -23,11 +24,12 @@ export const useCreateCustomer = () => {
   });
 };
 
-export function useGetAllCustomers() {
+export function useGetAllCustomers(page:number, limit:number,searchQuery:string, sortBy:string) {
+  const debouncedSearchQuery = useDebounce(searchQuery, 300); 
   return useQuery({
-    queryKey: ["allCustomer"],
+    queryKey: ["allCustomer", page, limit, debouncedSearchQuery, sortBy],
     queryFn: async () => {
-      const response = await axios.get(`/customer/`);
+      const response = await axios.get(`/customer?page=${page}&limit=${limit}&search=${debouncedSearchQuery}&sortBy=${sortBy}`);
       return response.data;
     },
   });

@@ -30,6 +30,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { indianStates } from "@/constants";
+import { useRouter } from "next/navigation";
 
 const alphabetOnlyRegex = /^[A-Za-z\s]+$/;
 
@@ -74,6 +75,7 @@ const driverFormSchema = () => {
 export type DriverFormType = z.infer<ReturnType<typeof driverFormSchema>>;
 
 const DriverForm = ({ driver }: { driver?: Driver }) => {
+  const router = useRouter();
   const { toast } = useToast();
   const [calendarOpen1, setCalendarOpen1] = useState(false);
   const [calendarOpen2, setCalendarOpen2] = useState(false);
@@ -134,17 +136,18 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
     createDriver(data)
       .then(() => {
         toast({
-          title: "Customer added successfully",
+          title: "Driver added successfully",
         });
+        router.push('/drivers?page=1&limit=10')
+        form.reset();
       })
       .catch((err) => {
         toast({
           title: "Uh Oh! Something went wrong",
-          description: `Failed to create customer, ${err.message}`,
+          description: `Failed to create driver, ${err.message}`,
           variant: "destructive",
         });
       });
-      form.reset();
   };
 
   const postalCode = form.watch("postal_code");
@@ -350,7 +353,7 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         captionLayout="dropdown-buttons"
-                        fromYear={1980}
+                        fromDate={new Date()}
                         toYear={2100}
                         mode="single"
                         selected={field.value}

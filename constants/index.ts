@@ -25,12 +25,12 @@ export const navItems: NavItem[] = [
   {
     name: "Customers",
     icon: Users,
-    url: "/customers",
+    url: "/customers?page=1&limit=10",
   },
   {
     name: "Drivers",
     icon: SquareUser,
-    url: "/drivers",
+    url: "/drivers?page=1&limit=10",
   },
   {
     name: "Forms",

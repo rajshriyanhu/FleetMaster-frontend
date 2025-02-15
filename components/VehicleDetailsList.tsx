@@ -1,138 +1,144 @@
-'use client'
+"use client";
 
-import { Vehicle } from '@/dto'
-import React, { useRef, useState } from 'react'
-import { Separator } from './ui/separator'
-import { convertTimestampToDate } from '@/utils'
-import { Button } from './ui/button'
-import { useFileUpload } from '@/hooks/use-file-upload'
-import { Input } from './ui/input'
-import { Upload } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
+import { Vehicle } from "@/dto";
+import React from "react";
+import { Separator } from "./ui/separator";
+import { convertTimestampToDate } from "@/utils";
+import { Button } from "./ui/button";
+import { useFileUpload } from "@/hooks/use-file-upload";
+import { Input } from "./ui/input";
+import { Upload } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const VehicleDetailsList = ({ vehicle }: { vehicle: Vehicle }) => {
   const uploadFile = useFileUpload();
-  const { toast } = useToast()
+  const { toast } = useToast();
 
   const downloadFile = async (filename: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL_PROD}/generate-download-url?file_name=${filename}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL_PROD}/generate-download-url?file_name=${filename}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       if (!response.ok) {
-        throw new Error('Failed to fetch the signed URL');
+        throw new Error("Failed to fetch the signed URL");
       }
       const { download_url } = await response.json();
 
-      console.log(response, download_url)
-      if (typeof window !== 'undefined') {
-        window.open(download_url, '_blank');
+      console.log(response, download_url);
+      if (typeof window !== "undefined") {
+        window.open(download_url, "_blank");
       }
     } catch (error) {
-      console.error('Error downloading file:', error);
+      console.log("Error downloading file:", error);
     }
-  }
+  };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
-    if (type === 'rc') {
+  const handleFileUpload = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: string
+  ) => {
+    if (type === "rc") {
       if (!e.target.files || !e.target.files[0]) {
         toast({
-          title: 'Failed to upload file',
-          description: 'Please try again later.',
-          variant: 'destructive'
-        })
+          title: "Failed to upload file",
+          description: "Please try again later.",
+          variant: "destructive",
+        });
         return;
       }
       uploadFile(`${vehicle.rc_url}`, e.target.files[0])
         .then(() => {
           toast({
-            title: 'RC uploaded successfully!'
-          })
+            title: "RC uploaded successfully!",
+          });
         })
         .catch((err) => {
           toast({
-            title: 'Failed to upload RC',
-            variant: 'destructive'
-          })
+            title: "Failed to upload RC",
+            variant: "destructive",
+          });
           return;
-        })
+        });
     }
 
-    if (type === 'insurance') {
+    if (type === "insurance") {
       if (!e.target.files || !e.target.files[0]) {
         toast({
-          title: 'Failed to upload file',
-          description: 'Please try again later.',
-          variant: 'destructive'
-        })
+          title: "Failed to upload file",
+          description: "Please try again later.",
+          variant: "destructive",
+        });
         return;
       }
       uploadFile(`${vehicle.insurance_url}`, e.target.files[0])
         .then(() => {
           toast({
-            title: 'Insurance uploaded successfully!'
-          })
+            title: "Insurance uploaded successfully!",
+          });
         })
         .catch((err) => {
           toast({
-            title: 'Failed to upload Insurance',
-            variant: 'destructive'
-          })
+            title: "Failed to upload Insurance",
+            variant: "destructive",
+          });
           return;
-        })
+        });
     }
 
-    if (type === 'fitness') {
+    if (type === "fitness") {
       if (!e.target.files || !e.target.files[0]) {
         toast({
-          title: 'Failed to upload file',
-          description: 'Please try again later.',
-          variant: 'destructive'
-        })
+          title: "Failed to upload file",
+          description: "Please try again later.",
+          variant: "destructive",
+        });
         return;
       }
       uploadFile(`${vehicle.fitness_url}`, e.target.files[0])
         .then(() => {
           toast({
-            title: 'Fitness uploaded successfully!'
-          })
+            title: "Fitness uploaded successfully!",
+          });
         })
         .catch((err) => {
           toast({
-            title: 'Failed to upload Fitness',
-            variant: 'destructive'
-          })
+            title: "Failed to upload Fitness",
+            variant: "destructive",
+          });
           return;
-        })
+        });
     }
 
-    if (type === 'puc') {
+    if (type === "puc") {
       if (!e.target.files || !e.target.files[0]) {
         toast({
-          title: 'Failed to upload file',
-          description: 'Please try again later.',
-          variant: 'destructive'
-        })
+          title: "Failed to upload file",
+          description: "Please try again later.",
+          variant: "destructive",
+        });
         return;
       }
       uploadFile(`${vehicle.rc_url}`, e.target.files[0])
         .then(() => {
           toast({
-            title: 'PUC uploaded successfully!'
-          })
+            title: "PUC uploaded successfully!",
+          });
         })
         .catch((err) => {
           toast({
-            title: 'Failed to upload PUC',
-            variant: 'destructive'
-          })
+            title: "Failed to upload PUC",
+            variant: "destructive",
+          });
           return;
-        })
+        });
     }
-  }
+  };
 
   return (
     <div className="flex w-full px-16 flex-col justify-center space-y-2 rounded-xl bg-white py-8">
@@ -178,9 +184,7 @@ const VehicleDetailsList = ({ vehicle }: { vehicle: Vehicle }) => {
       <Separator />
       <div className="grid grid-cols-2 gap-4">
         <div>Tranmission Type</div>
-        <div className="text-lg font-semibold">
-          {vehicle.transmission_type}
-        </div>
+        <div className="text-lg font-semibold">{vehicle.transmission_type}</div>
       </div>
       <Separator />
       <div className="grid grid-cols-2 gap-4">
@@ -230,15 +234,29 @@ const VehicleDetailsList = ({ vehicle }: { vehicle: Vehicle }) => {
 
       <div className="grid grid-cols-2 gap-4">
         <div>RC</div>
-        <div className='flex justify-between'>
-          <Button onClick={() => downloadFile(vehicle.rc_url)} variant='ghost' className="text-lg font-semibold">
+        <div className="flex justify-between">
+          <Button
+            onClick={() => downloadFile(vehicle.rc_url)}
+            variant="ghost"
+            className="text-lg font-semibold"
+          >
             View
           </Button>
-          <Button variant='ghost' className="text-lg font-semibold">
+          <Button variant="ghost" className="text-lg font-semibold">
             <div className="flex items-center justify-between gap-2">
-              <Input id='rc-upload' className="hidden" type="file" onChange={(e) => handleFileUpload(e, 'rc')} />
-              <label htmlFor='rc-upload' className="rounded-md px-2 py-[5px] w-full flex items-center gap-4 cursor-pointer">
-                <div className="w-full flex items-center justify-between gap-2">Replace <Upload /></div>
+              <Input
+                id="rc-upload"
+                className="hidden"
+                type="file"
+                onChange={(e) => handleFileUpload(e, "rc")}
+              />
+              <label
+                htmlFor="rc-upload"
+                className="rounded-md px-2 py-[5px] w-full flex items-center gap-4 cursor-pointer"
+              >
+                <div className="w-full flex items-center justify-between gap-2">
+                  Replace <Upload />
+                </div>
               </label>
             </div>
           </Button>
@@ -258,20 +276,33 @@ const VehicleDetailsList = ({ vehicle }: { vehicle: Vehicle }) => {
       <Separator />
       <div className="grid grid-cols-2 gap-4">
         <div>Insurance</div>
-        <div className='flex justify-between'>
-        <Button onClick={() => downloadFile(vehicle.insurance_url)} variant='ghost' className="text-lg font-semibold">
-          View
-        </Button>
-        <Button variant='ghost' className="text-lg font-semibold">
-          <div className="flex items-center justify-between gap-2">
-            <Input id='insurance-upload' className="hidden" type="file" onChange={(e) => handleFileUpload(e, 'insurance')} />
-            <label htmlFor='insurance-upload' className="rounded-md px-2 py-[5px] w-full flex items-center gap-4 cursor-pointer">
-              <div className="w-full flex items-center justify-between gap-2">Replace <Upload /></div>
-            </label>
-          </div>
-        </Button>
+        <div className="flex justify-between">
+          <Button
+            onClick={() => downloadFile(vehicle.insurance_url)}
+            variant="ghost"
+            className="text-lg font-semibold"
+          >
+            View
+          </Button>
+          <Button variant="ghost" className="text-lg font-semibold">
+            <div className="flex items-center justify-between gap-2">
+              <Input
+                id="insurance-upload"
+                className="hidden"
+                type="file"
+                onChange={(e) => handleFileUpload(e, "insurance")}
+              />
+              <label
+                htmlFor="insurance-upload"
+                className="rounded-md px-2 py-[5px] w-full flex items-center gap-4 cursor-pointer"
+              >
+                <div className="w-full flex items-center justify-between gap-2">
+                  Replace <Upload />
+                </div>
+              </label>
+            </div>
+          </Button>
         </div>
-        
       </div>
       <Separator />
       <div className="grid grid-cols-2 gap-4">
@@ -283,18 +314,32 @@ const VehicleDetailsList = ({ vehicle }: { vehicle: Vehicle }) => {
       <Separator />
       <div className="grid grid-cols-2 gap-4">
         <div>PUC</div>
-        <div className='flex justify-between'>
-        <Button onClick={() => downloadFile(vehicle.puc_url)} variant='ghost' className="text-lg font-semibold">
-          View
-        </Button>
-        <Button variant='ghost' className="text-lg font-semibold">
-          <div className="flex items-center justify-between gap-2">
-            <Input id='puc-upload' className="hidden" type="file" onChange={(e) => handleFileUpload(e, 'puc')} />
-            <label htmlFor='puc-upload' className="rounded-md px-2 py-[5px] w-full flex items-center gap-4 cursor-pointer">
-              <div className="w-full flex items-center justify-between gap-2">Replace <Upload /></div>
-            </label>
-          </div>
-        </Button>
+        <div className="flex justify-between">
+          <Button
+            onClick={() => downloadFile(vehicle.puc_url)}
+            variant="ghost"
+            className="text-lg font-semibold"
+          >
+            View
+          </Button>
+          <Button variant="ghost" className="text-lg font-semibold">
+            <div className="flex items-center justify-between gap-2">
+              <Input
+                id="puc-upload"
+                className="hidden"
+                type="file"
+                onChange={(e) => handleFileUpload(e, "puc")}
+              />
+              <label
+                htmlFor="puc-upload"
+                className="rounded-md px-2 py-[5px] w-full flex items-center gap-4 cursor-pointer"
+              >
+                <div className="w-full flex items-center justify-between gap-2">
+                  Replace <Upload />
+                </div>
+              </label>
+            </div>
+          </Button>
         </div>
       </div>
       <Separator />
@@ -307,18 +352,32 @@ const VehicleDetailsList = ({ vehicle }: { vehicle: Vehicle }) => {
       <Separator />
       <div className="grid grid-cols-2 gap-4">
         <div>Fitness</div>
-        <div className='flex justify-between'>
-        <Button onClick={() => downloadFile(vehicle.fitness_url)} variant='ghost' className="text-lg font-semibold">
-          View
-        </Button>
-        <Button variant='ghost' className="text-lg font-semibold">
-          <div className="flex items-center justify-between gap-2">
-            <Input id='fitness-upload' className="hidden w-full" type="file" onChange={(e) => handleFileUpload(e, 'fitness')} />
-            <label htmlFor='fitness-upload' className="rounded-md px-2 py-[5px] w-full flex items-center gap-4 cursor-pointer">
-              <div className="w-full flex items-center justify-between gap-2">Replace <Upload /></div>
-            </label>
-          </div>
-        </Button>
+        <div className="flex justify-between">
+          <Button
+            onClick={() => downloadFile(vehicle.fitness_url)}
+            variant="ghost"
+            className="text-lg font-semibold"
+          >
+            View
+          </Button>
+          <Button variant="ghost" className="text-lg font-semibold">
+            <div className="flex items-center justify-between gap-2">
+              <Input
+                id="fitness-upload"
+                className="hidden w-full"
+                type="file"
+                onChange={(e) => handleFileUpload(e, "fitness")}
+              />
+              <label
+                htmlFor="fitness-upload"
+                className="rounded-md px-2 py-[5px] w-full flex items-center gap-4 cursor-pointer"
+              >
+                <div className="w-full flex items-center justify-between gap-2">
+                  Replace <Upload />
+                </div>
+              </label>
+            </div>
+          </Button>
         </div>
       </div>
       <Separator />
@@ -339,9 +398,7 @@ const VehicleDetailsList = ({ vehicle }: { vehicle: Vehicle }) => {
       <Separator />
       <div className="grid grid-cols-2 gap-4">
         <div>Last Service KMs</div>
-        <div className="text-lg font-semibold">
-          {vehicle.last_service_kms}
-        </div>
+        <div className="text-lg font-semibold">{vehicle.last_service_kms}</div>
       </div>
       <Separator />
       <div className="grid grid-cols-2 gap-4">
@@ -359,11 +416,6 @@ const VehicleDetailsList = ({ vehicle }: { vehicle: Vehicle }) => {
       </div>
       <Separator />
 
-
-
-
-
-
       <div className="grid grid-cols-2 gap-4">
         <div>Vehicle Entry Date</div>
         <div className="text-lg font-semibold">
@@ -378,7 +430,7 @@ const VehicleDetailsList = ({ vehicle }: { vehicle: Vehicle }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default VehicleDetailsList
+export default VehicleDetailsList;

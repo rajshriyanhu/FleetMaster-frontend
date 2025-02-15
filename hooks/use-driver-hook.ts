@@ -1,6 +1,7 @@
 import { DriverFormType } from "@/components/DriverForm";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import { useDebounce } from "./use-debounce";
 
 axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
 axios.defaults.withCredentials = true;
@@ -23,11 +24,12 @@ export const useCreateDriver = () => {
   });
 };
 
-export function useGetAllDrivers() {
+export function useGetAllDrivers(page:number, limit:number,searchQuery:string, sortBy:string) {
+  const debouncedSearchQuery = useDebounce(searchQuery, 300); 
   return useQuery({
-    queryKey: ["allDriver"],
+    queryKey: ["allDriver", page, limit, debouncedSearchQuery, sortBy],
     queryFn: async () => {
-      const response = await axios.get(`/driver/`);
+      const response = await axios.get(`/driver?page=${page}&limit=${limit}&search=${debouncedSearchQuery}&sortBy=${sortBy}`);
       return response.data;
     },
   });

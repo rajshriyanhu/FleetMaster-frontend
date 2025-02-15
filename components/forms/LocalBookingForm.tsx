@@ -30,7 +30,9 @@ import { useLocalBookingImage } from "@/hooks/use-form-hook";
 import { useEffect, useState } from "react";
 import {
   costExtraHr,
+  costExtraHrMap,
   costExtraKm,
+  costExtraKmMap,
   kmMap,
   packageOptions,
   passengerCapacity,
@@ -70,7 +72,7 @@ const LocalBookingForm = () => {
       package_type: "",
       time_limit: "",
       km_limit: "",
-      end_date_time: '',
+      end_date_time: "",
     },
   });
 
@@ -101,8 +103,9 @@ const LocalBookingForm = () => {
   };
 
   const capacity = form.watch("passenger");
-  const total = form.watch('total')
-  const advance = form.watch('advance')
+  const total = form.watch("total");
+  const advance = form.watch("advance");
+  const vehicleName = form.watch("vehicle");
 
   useEffect(() => {
     if (capacity && capacity === passengerCapacity[1]) {
@@ -115,10 +118,21 @@ const LocalBookingForm = () => {
       setNewVehicleArray(vehicle);
     }
 
-    if(total && advance){
-      form.setValue('balance', total - advance)
+    if (total && advance) {
+      form.setValue("balance", total - advance);
     }
-  }, [capacity, total, advance, form]);
+
+    if (vehicleName) {
+      const hrValue = costExtraHrMap[vehicleName];
+      const kmValue = costExtraKmMap[vehicleName];
+      form.setValue("cost_extra_hr", hrValue.toString());
+
+      form.setValue("cost_extra_km", kmValue.toString(), {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+  }, [capacity, total, advance, vehicleName, form]);
 
   return (
     <>
@@ -443,6 +457,8 @@ const LocalBookingForm = () => {
                 </FormLabel>
                 <FormControl>
                   <Select
+                    value={field.value}
+                    defaultValue={field.value}
                     onValueChange={(value) => {
                       field.onChange(value);
                     }}
@@ -476,6 +492,8 @@ const LocalBookingForm = () => {
                 </FormLabel>
                 <FormControl>
                   <Select
+                    value={field.value}
+                    defaultValue={field.value}
                     onValueChange={(value) => {
                       field.onChange(value);
                     }}

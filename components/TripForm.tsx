@@ -32,6 +32,7 @@ import { Driver, Trip, Vehicle } from "@/dto";
 import { useGetAllDrivers } from "@/hooks/use-driver-hook";
 import { useGetAllVehicles } from "@/hooks/use-vehicle-hook";
 import { getDaysBetweenDates } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 const tripFormSchema = () => {
   return z.object({
@@ -66,6 +67,7 @@ const tripFormSchema = () => {
 export type TripFormSchema = z.infer<ReturnType<typeof tripFormSchema>>;
 
 const TripForm = ({ trip }: { trip?: Trip }) => {
+  const router = useRouter();
   const { data: allDrivers, isError: driverError } = useGetAllDrivers();
   const { data: allVehicle, isError: vehicleError } = useGetAllVehicles();
   const [errorMessage, setErrorMessage] = useState("");
@@ -158,6 +160,8 @@ const TripForm = ({ trip }: { trip?: Trip }) => {
         toast({
           title: "Trip created successfully",
         });
+        form.reset();
+        router.push('/trip')
       })
       .catch((err) => {
         toast({
