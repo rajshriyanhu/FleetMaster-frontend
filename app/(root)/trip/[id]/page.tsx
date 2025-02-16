@@ -4,10 +4,19 @@ import { Separator } from "@/components/ui/separator";
 import { Trip } from "@/dto";
 import { useToast } from "@/hooks/use-toast";
 import { useDeleteTrip, useGetTripById } from "@/hooks/use-trip-hook";
-import { convertTimestampToDate, getTripStatus } from "@/utils";
+import { convertTimestampToDate } from "@/utils";
 import { Pencil1Icon, TrashIcon } from "@radix-ui/react-icons";
 import { useParams, useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect } from "react";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { useHeader } from "@/hooks/use-header";
 
 const TripDetailsPage = () => {
   const params = useParams();
@@ -15,6 +24,21 @@ const TripDetailsPage = () => {
   const router = useRouter();
   const { data, isLoading, isError } = useGetTripById(params.id as string);
   const {mutateAsync: deleteTrip} = useDeleteTrip(params.id as string);
+  const { setTitle } = useHeader();
+
+  useEffect(() => {
+    setTitle(
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbLink href="/trip">Trip</BreadcrumbLink>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Trip details</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+    );
+  }, []);
 
   if (isLoading) return <>Loading</>;
 

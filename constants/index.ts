@@ -60,12 +60,13 @@ export const FormCategories = [
 ];
 
 
-export const indianStates = [
+export const IndianStates = [
   "Andhra Pradesh",
   "Arunachal Pradesh",
   "Assam",
   "Bihar",
   "Chhattisgarh",
+  "Delhi",
   "Goa",
   "Gujarat",
   "Haryana",

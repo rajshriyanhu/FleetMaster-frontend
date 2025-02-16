@@ -2,13 +2,41 @@
 
 import TripForm from "@/components/TripForm";
 import { Trip } from "@/dto";
+import { useHeader } from "@/hooks/use-header";
 import { useGetTripById } from "@/hooks/use-trip-hook";
-import { useGetVehicleById } from "@/hooks/use-vehicle-hook";
 import { useParams } from "next/navigation";
+import { useEffect } from "react";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 export default function TripEditPage() {
   const params = useParams();
   const { data, isLoading, isError } = useGetTripById(params.id as string);
+  const { setTitle } = useHeader();
+
+  useEffect(() => {
+    setTitle(
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbLink href="/trip">Trip</BreadcrumbLink>
+          <BreadcrumbSeparator />
+          <BreadcrumbLink href={`/trip/${params.id as string}`}>
+            Trip details
+          </BreadcrumbLink>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Edit</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+    );
+  }, []);
 
   if (isLoading) return <>Loading</>;
 

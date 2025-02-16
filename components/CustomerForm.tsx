@@ -16,7 +16,6 @@ import { Input } from "./ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
-import Image from "next/image";
 import {
   useCreateCustomer,
   useUpdateCustomer,
@@ -28,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { indianStates } from "@/constants";
+import { IndianStates } from "@/constants";
 import { useRouter } from "next/navigation";
 
 const customerFormSchema = () => {
@@ -55,15 +54,15 @@ const CustomerForm = ({ user }: { user?: Customer }) => {
   const form = useForm<CustomerFormType>({
     resolver: zodResolver(customerFormSchema()),
     defaultValues: {
-      prefix: '',
-      name: '',
-      email: '',
-      phone_number: '',
-      street: '',
-      city: '',
-      state: '',
-      postal_code: undefined
-    }
+      prefix: "",
+      name: "",
+      email: "",
+      phone_number: "",
+      street: "",
+      city: "",
+      state: "",
+      postal_code: undefined,
+    },
   });
 
   useEffect(() => {
@@ -85,7 +84,7 @@ const CustomerForm = ({ user }: { user?: Customer }) => {
             title: "Customer details saved successfully",
           });
           form.reset();
-          router.push('/customers?page=1&limit=10')
+          router.push("/customers?page=1&limit=10");
         })
         .catch((err) => {
           toast({
@@ -102,7 +101,7 @@ const CustomerForm = ({ user }: { user?: Customer }) => {
           title: "Customer added successfully",
         });
         form.reset();
-          router.push('/customers?page=1&limit=10')
+        router.push("/customers?page=1&limit=10");
       })
       .catch((err) => {
         toast({
@@ -111,56 +110,52 @@ const CustomerForm = ({ user }: { user?: Customer }) => {
           variant: "destructive",
         });
       });
-    form.reset();
   };
 
-    const postalCode = form.watch("postal_code");
-    const phone = form.watch("phone_number");
-  
-    useEffect(() => {
-      if (postalCode !== undefined && postalCode !== null) {
-        if (postalCode < 100000 || postalCode > 999999) {
-          form.setError("postal_code", {
-            type: "manual",
-            message: "Postal code must be exactly 6 digits.",
-          });
-        } else {
-          form.clearErrors("postal_code");
-        }
+  const postalCode = form.watch("postal_code");
+  const phone = form.watch("phone_number");
+
+  useEffect(() => {
+    if (postalCode !== undefined && postalCode !== null) {
+      if (postalCode < 100000 || postalCode > 999999) {
+        form.setError("postal_code", {
+          type: "manual",
+          message: "Postal code must be exactly 6 digits.",
+        });
+      } else {
+        form.clearErrors("postal_code");
       }
-  
-      if (phone) {
-        if (phone.length > 0 && (phone.length !== 10 || !/^\d+$/.test(phone))) {
-          form.setError("phone_number", {
-            type: "manual",
-            message: "Phone number must be exactly 10 digits.",
-          });
-        } else {
-          form.clearErrors("phone_number");
-        }
+    }
+
+    if (phone) {
+      if (phone.length > 0 && (phone.length !== 10 || !/^\d+$/.test(phone))) {
+        form.setError("phone_number", {
+          type: "manual",
+          message: "Phone number must be exactly 10 digits.",
+        });
+      } else {
+        form.clearErrors("phone_number");
       }
-  
-      
-    }, [postalCode, phone, form]);
+    }
+  }, [postalCode, phone, form]);
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-8 w-full"
-      >
-        <div className="flex gap-4 w-full">
-          <FormField
-            name="prefix"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem className="w-2/5">
-                <div className="shad-form-item">
-                  <FormLabel className="shad-form-label">Prefix</FormLabel>
-                  <FormControl>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full px-8">
+        {/* Personal Information Section */}
+        <div className="bg-white p-6 rounded-lg border shadow-sm">
+          <h3 className="text-lg font-semibold mb-4">Personal Information</h3>
+          <div className="grid gap-6">
+            <div className="flex gap-4">
+              <FormField
+                name="prefix"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem className="w-32">
+                    <FormLabel>Title</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger className="shad-select-trigger">
-                        <SelectValue placeholder="Prefix" />
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Mr.">Mr.</SelectItem>
@@ -168,164 +163,170 @@ const CustomerForm = ({ user }: { user?: Customer }) => {
                         <SelectItem value="Ms.">Ms.</SelectItem>
                       </SelectContent>
                     </Select>
-                  </FormControl>
-                  <FormMessage className="shad-form-message" />
-                </div>
-              </FormItem>
-            )}
-          />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          <FormField
-            name="name"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <div className="shad-form-item">
-                  <FormLabel className="shad-form-label">
-                    Name of the customer
-                  </FormLabel>
-                  <FormControl>
-                    <Input className="shad-input" {...field} />
-                  </FormControl>
-                </div>
-                <FormMessage className="shad-form-message" />
-              </FormItem>
-            )}
-          />
-        </div>
-        <FormField
-          name="email"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">Email</FormLabel>
-                <FormControl>
-                  <Input className="shad-input" {...field} />
-                </FormControl>
-                <FormMessage className="shad-form-message" />
-              </div>
-            </FormItem>
-          )}
-        />
-        <FormField
-          name="phone_number"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">Phone Number</FormLabel>
-                <FormControl>
-                  <Input className="shad-input" {...field} />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
-        <FormField
-          name="street"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  Flat/Builidng/Street Name
-                </FormLabel>
-                <FormControl>
-                  <Input className="shad-input" {...field} />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
-        <FormField
-          name="city"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">City</FormLabel>
-                <FormControl>
-                  <Input className="shad-input" {...field} />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="state"
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">State</FormLabel>
-                <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    // defaultValue={vehicle ? vehicle.state : field.value}
-                  >
+              <FormField
+                name="name"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>Full Name</FormLabel>
                     <FormControl>
+                      <Input placeholder="Enter full name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <FormField
+                name="email"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email Address</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="email@example.com"
+                        type="email"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                name="phone_number"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone Number</FormLabel>
+                    <FormControl>
+                      <Input placeholder="10-digit mobile number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Address Section */}
+        <div className="bg-white p-6 rounded-lg border shadow-sm">
+          <h3 className="text-lg font-semibold mb-4">Address Details</h3>
+          <div className="grid gap-6">
+            <FormField
+              name="street"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Street Address</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Flat no., Building name, Street"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid md:grid-cols-3 gap-4">
+              <FormField
+                name="city"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>City</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter city" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="state"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>State</FormLabel>
+                    <Select onValueChange={field.onChange}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select state" />
                       </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {indianStates.map((state, index) => {
-                        return (
+                      <SelectContent>
+                        {IndianStates.map((state, index) => (
                           <SelectItem key={index} value={state}>
                             {state}
                           </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-        <FormField
-          name="postal_code"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">PIN Code</FormLabel>
-                <FormControl>
-                  <Input
-                    className="shad-input"
-                    {...field}
-                    value={field.value ?? ""}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      field.onChange(value === "" ? undefined : Number(value));
-                    }}
-                  />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+              <FormField
+                name="postal_code"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>PIN Code</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="6-digit PIN code"
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(
+                            value === "" ? undefined : Number(value)
+                          );
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+        </div>
 
-        <Button className="modal-submit-button">
-          Submit
-          {(isPending || isUpdatingCustomer) && (
-            <Image
-              src="/assets/icons/loader.svg"
-              alt="loader"
-              height={24}
-              width={24}
-              className="ml-2 animate-spin"
-            />
-          )}
-        </Button>
+        {/* Form Actions */}
+        <div className="flex justify-end gap-4">
+          <Button type="button" variant="outline" onClick={() => router.back()}>
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            className="min-w-[120px]"
+            disabled={isPending || isUpdatingCustomer}
+          >
+            {isPending || isUpdatingCustomer ? (
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                {user ? "Saving..." : "Creating..."}
+              </div>
+            ) : user ? (
+              "Save Changes"
+            ) : (
+              "Create Customer"
+            )}
+          </Button>
+        </div>
       </form>
     </Form>
   );

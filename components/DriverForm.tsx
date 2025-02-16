@@ -16,7 +16,6 @@ import { Input } from "./ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
-import Image from "next/image";
 import { useCreateDriver, useUpdateDriver } from "@/hooks/use-driver-hook";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { format } from "date-fns";
@@ -29,8 +28,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { indianStates } from "@/constants";
+import { IndianStates } from "@/constants";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 const alphabetOnlyRegex = /^[A-Za-z\s]+$/;
 
@@ -115,6 +115,8 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
     }
   }, [driver, form]);
 
+  console.log(form.formState.errors)
+
   const onSubmit = (data: DriverFormType) => {
     console.log(data);
     if (driver) {
@@ -182,7 +184,7 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
       if (altPhone.length > 0 && (altPhone.length !== 10 || !/^\d+$/.test(altPhone))) {
         form.setError("alt_phone_number", {
           type: "manual",
-          message: "Alternate phone number must be exactly 10 digits.",
+          message: "Phone number must be exactly 10 digits.",
         });
       } else {
         form.clearErrors("alt_phone_number");
@@ -193,7 +195,7 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
       if (emgPhone && (emgPhone.length !== 10 || !/^\d+$/.test(emgPhone))) {
         form.setError("emg_phone_number", {
           type: "manual",
-          message: "Emergency phone number must be exactly 10 digits.",
+          message: "Phone number must be exactly 10 digits.",
         });
       } else {
         form.clearErrors("emg_phone_number");
@@ -203,347 +205,72 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-8 w-full"
-      >
-        <FormField
-          name="name"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  Name of the driver
-                </FormLabel>
-                <FormControl>
-                  <Input className="shad-input" {...field} />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
-        <FormField
-          name="email"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">Email</FormLabel>
-                <FormControl>
-                  <Input className="shad-input" {...field} />
-                </FormControl>
-                <FormMessage className="shad-form-message" />
-              </div>
-            </FormItem>
-          )}
-        />
-        <FormField
-          name="phone_number"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">Phone Number</FormLabel>
-                <FormControl>
-                <Input className="shad-input" {...field} />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full px-8">
+        {/* Personal Information */}
+        <div className="bg-white p-6 rounded-lg border shadow-sm ">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900">Personal Information</h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <FormField
+              name="name"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Full Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter driver's name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          name="alt_phone_number"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  Alternate Phone Number
-                </FormLabel>
-                <FormControl>
-                <Input className="shad-input" {...field} />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+            <FormField
+              name="email"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email Address</FormLabel>
+                  <FormControl>
+                    <Input placeholder="email@example.com" type="email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          name="emg_name"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  Emergency Contact (Name)
-                </FormLabel>
-                <FormControl>
-                  <Input className="shad-input" {...field} />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+            <FormField
+              name="phone_number"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="10-digit mobile number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          name="emg_relation"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  Relationship of Emergency Contact
-                </FormLabel>
-                <FormControl>
-                  <Input className="shad-input" {...field} />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          name="emg_phone_number"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  Emergency Phone Number
-                </FormLabel>
-                <FormControl>
-                <Input className="shad-input" {...field} />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="insurance_valid_upto"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  Insurance Valid Upto
-                </FormLabel>
-                <div className="border rounded-md w-full">
-                  <Popover open={calendarOpen1} onOpenChange={setCalendarOpen1}>
-                    <PopoverTrigger className="w-full" asChild>
-                      <FormControl>
-                        <Button variant="ghost">
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto size-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        captionLayout="dropdown-buttons"
-                        fromDate={new Date()}
-                        toYear={2100}
-                        mode="single"
-                        selected={field.value}
-                        onSelect={(date) => {
-                          field.onChange(date);
-                          setCalendarOpen1(false);
-                        }}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          name="dl_number"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  DL Registration Number
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder="" className="shad-input" {...field} />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
-        <FormField
-          name="experience"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  Experience (years)
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    className="shad-input"
-                    {...field}
-                    value={field.value ?? ""}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      field.onChange(value === "" ? undefined : Number(value));
-                    }}
-                  />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
-        <FormField
-          name="expertise"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  Driving Expertise
-                </FormLabel>
-                <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    // defaultValue={vehicle ? vehicle.region : field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select expertise" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="LMV">LMV</SelectItem>
-                      <SelectItem value="LMV+TT">LMV + TT</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          name="street"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  Flat/Builidng/Street Name
-                </FormLabel>
-                <FormControl>
-                  <Input className="shad-input" {...field} />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          name="city"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">City</FormLabel>
-                <FormControl>
-                  <Input className="shad-input" {...field} />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="state"
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">State</FormLabel>
-                <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    // defaultValue={vehicle ? vehicle.state : field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select state" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {indianStates.map((state, index) => {
-                        return (
-                          <SelectItem key={index} value={state}>
-                            {state}
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          name="postal_code"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">PIN Code</FormLabel>
-                <FormControl>
-                  <Input
-                    className="shad-input"
-                    {...field}
-                    value={field.value ?? ""}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      field.onChange(value === "" ? undefined : Number(value));
-                    }}
-                  />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
-
-        <FormField
+            <FormField
+              name="alt_phone_number"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Alternative Phone</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Alternative contact number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
           name="working_region"
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
+                <FormLabel >
                   Working Region
                 </FormLabel>
                 <FormControl>
@@ -564,8 +291,8 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
                     </SelectContent>
                   </Select>
                 </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
+                <FormMessage />
+
             </FormItem>
           )}
         />
@@ -575,8 +302,7 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
           name="working_state"
           render={({ field }) => (
             <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">Working State</FormLabel>
+                <FormLabel>Working State</FormLabel>
                 <FormControl>
                   <Select
                     onValueChange={field.onChange}
@@ -588,7 +314,7 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {indianStates.map((state, index) => {
+                      {IndianStates.map((state, index) => {
                         return (
                           <SelectItem key={index} value={state}>
                             {state}
@@ -598,8 +324,8 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
                     </SelectContent>
                   </Select>
                 </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
+                <FormMessage />
+
             </FormItem>
           )}
         />
@@ -609,29 +335,180 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">Working City</FormLabel>
+                <FormLabel>Working City</FormLabel>
                 <FormControl>
-                  <Input className="shad-input" {...field} />
+                  <Input {...field} />
                 </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
+              <FormMessage />
             </FormItem>
           )}
         />
+          </div>
+        </div>
 
-        <FormField
+        {/* Emergency Contact */}
+        <div className="bg-white p-6 rounded-lg border shadow-sm">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900">Emergency Contact</h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <FormField
+              name="emg_name"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contact Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Emergency contact person" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              name="emg_relation"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Relationship</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Relationship with driver" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              name="emg_phone_number"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Emergency Phone</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Emergency contact number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        {/* Professional Details */}
+        <div className="bg-white p-6 rounded-lg border shadow-sm">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900">Professional Details</h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <FormField
+              control={form.control}
+              name="insurance_valid_upto"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Insurance Validity</FormLabel>
+                  <Popover open={calendarOpen1} onOpenChange={setCalendarOpen1}>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? format(field.value, "PPP") : "Select date"}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={(date) => {
+                          field.onChange(date);
+                          setCalendarOpen1(false);
+                        }}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              name="dl_number"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>DL Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Driver's License Number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              name="experience"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Experience (Years)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Years of experience"
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === "" ? undefined : Number(value));
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              name="expertise"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Driving Expertise</FormLabel>
+                  <Select onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select expertise" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="LMV">LMV</SelectItem>
+                      <SelectItem value="LMV+TT">LMV + TT</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
           control={form.control}
           name="joining_date"
           render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">Joining Date</FormLabel>
-                <div className="border rounded-md w-full">
+            <FormItem >
+                <FormLabel >Joining Date</FormLabel>
                   <Popover open={calendarOpen2} onOpenChange={setCalendarOpen2}>
                     <PopoverTrigger className="w-full" asChild>
                       <FormControl>
-                        <Button variant="ghost">
+                        <Button variant="outline"
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}>
                           {field.value ? (
                             format(field.value, "PPP")
                           ) : (
@@ -656,25 +533,25 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
                       />
                     </PopoverContent>
                   </Popover>
-                </div>
-              </div>
-              <FormMessage className="shad-form-message" />
+              <FormMessage />
             </FormItem>
           )}
         />
 
-        <FormField
+            <FormField
           control={form.control}
           name="exit_date"
           render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">Exit Date</FormLabel>
-                <div className="border rounded-md w-full">
+            <FormItem >
+                <FormLabel >Exit Date</FormLabel>
                   <Popover open={calendarOpen3} onOpenChange={setCalendarOpen3}>
                     <PopoverTrigger className="w-full" asChild>
                       <FormControl>
-                        <Button variant="ghost">
+                        <Button variant="outline"
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}>
                           {field.value ? (
                             format(field.value, "PPP")
                           ) : (
@@ -699,9 +576,7 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
                       />
                     </PopoverContent>
                   </Popover>
-                </div>
-              </div>
-              <FormMessage className="shad-form-message" />
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -711,8 +586,7 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
+                <FormLabel>
                   Employement Status
                 </FormLabel>
                 <FormControl>
@@ -731,24 +605,118 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
                     </SelectContent>
                   </Select>
                 </FormControl>
-              </div>
               <FormMessage className="shad-form-message" />
             </FormItem>
           )}
         />
+          </div>
+        </div>
 
-        <Button className="modal-submit-button">
-          Submit
-          {(isPending || isUpdatingDriver) && (
-            <Image
-              src="/assets/icons/loader.svg"
-              alt="loader"
-              height={24}
-              width={24}
-              className="ml-2 animate-spin"
+        {/* Address Details */}
+        <div className="bg-white p-6 rounded-lg border shadow-sm">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900">Residential Address</h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <FormField
+              name="street"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem className="col-span-full">
+                  <FormLabel>Street Address</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Flat no., Building name, Street" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          )}
-        </Button>
+
+            <FormField
+              name="city"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>City</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter city" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="state"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>State</FormLabel>
+                  <Select onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select state" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {IndianStates.map((state, index) => (
+                        <SelectItem key={index} value={state}>
+                          {state}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              name="postal_code"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>PIN Code</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="6-digit PIN code"
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === "" ? undefined : Number(value));
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        {/* Form Actions */}
+        <div className="flex justify-end gap-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.back()}
+          >
+            Cancel
+          </Button>
+          <Button 
+            type="submit"
+            className="min-w-[120px]"
+            disabled={isPending || isUpdatingDriver}
+          >
+            {isPending || isUpdatingDriver ? (
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                {driver ? "Saving..." : "Creating..."}
+              </div>
+            ) : (
+              driver ? "Save Changes" : "Create Driver"
+            )}
+          </Button>
+        </div>
       </form>
     </Form>
   );

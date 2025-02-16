@@ -68,7 +68,12 @@ export type TripFormSchema = z.infer<ReturnType<typeof tripFormSchema>>;
 
 const TripForm = ({ trip }: { trip?: Trip }) => {
   const router = useRouter();
-  const { data: allDrivers, isError: driverError } = useGetAllDrivers();
+  const { data: allDrivers, isError: driverError } = useGetAllDrivers(
+    1,
+    20,
+    "",
+    "name"
+  );
   const { data: allVehicle, isError: vehicleError } = useGetAllVehicles();
   const [errorMessage, setErrorMessage] = useState("");
   const { mutateAsync: createTrip, isPending: isLoading } = useCreateTrip();
@@ -161,7 +166,7 @@ const TripForm = ({ trip }: { trip?: Trip }) => {
           title: "Trip created successfully",
         });
         form.reset();
-        router.push('/trip')
+        router.push("/trip");
       })
       .catch((err) => {
         toast({
@@ -352,8 +357,8 @@ const TripForm = ({ trip }: { trip?: Trip }) => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {allDrivers.drivers.length > 0 ? (
-                          allDrivers.drivers.map((driver: Driver) => {
+                        {allDrivers.length > 0 ? (
+                          allDrivers.map((driver: Driver) => {
                             return (
                               <SelectItem key={driver.id} value={driver.id}>
                                 {driver.name}
@@ -909,7 +914,9 @@ const TripForm = ({ trip }: { trip?: Trip }) => {
           )}
         />
 
-        <Button>{trip ? "Save" : "Create Trip"}</Button>
+        <Button disabled={isLoading || isUpdatingLoading}>
+          {trip ? "Save" : "Create Trip"}
+        </Button>
       </form>
     </Form>
   );

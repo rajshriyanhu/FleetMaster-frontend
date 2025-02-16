@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { PlusCircledIcon } from "@radix-ui/react-icons";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useGetAllCustomers } from "@/hooks/use-customer-hook";
 import {
   Pagination,
@@ -22,6 +22,13 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { useHeader } from "@/hooks/use-header";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb";
 
 const CustomerPage = () => {
   const router = useRouter();
@@ -29,6 +36,19 @@ const CustomerPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("name");
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
+  const { setTitle } = useHeader();
+
+  useEffect(() => {
+    setTitle(
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbPage>Customers</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+    );
+  }, []);
 
   const { data, isLoading } = useGetAllCustomers(
     currentPage,

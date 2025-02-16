@@ -15,12 +15,18 @@ import { Trip } from "@/dto";
 import { useRouter } from "next/navigation";
 import { useGetAllTrips } from "@/hooks/use-trip-hook";
 
-const AllTripTable = () => {
+const AllTripTable = ({
+  trips,
+  isLoading,
+}: {
+  trips: Trip[] | null;
+  isLoading: boolean;
+}) => {
   const router = useRouter();
-    const { data: tripList, isLoading } = useGetAllTrips();
-  console.log(tripList);
 
-  if(isLoading || !tripList)return <>Loading</>
+  if (isLoading) return <>Loading</>;
+
+  if (!trips) return <>Error</>;
 
   return (
     <Table>
@@ -29,7 +35,9 @@ const AllTripTable = () => {
         <TableRow>
           <TableHead className="font-semibold text-black">No.</TableHead>
           <TableHead className="font-semibold text-black">Source</TableHead>
-          <TableHead className="font-semibold text-black">Destination</TableHead>
+          <TableHead className="font-semibold text-black">
+            Destination
+          </TableHead>
           <TableHead className="font-semibold text-black">Price</TableHead>
           <TableHead className="font-semibold text-black">Customer</TableHead>
           <TableHead className="font-semibold text-black">Driver</TableHead>
@@ -37,10 +45,14 @@ const AllTripTable = () => {
           <TableHead className="font-semibold text-black">End Date</TableHead>
         </TableRow>
       </TableHeader>
-      <TableBody >
-        {tripList.trips.map((trip : Trip, index: number) => {
+      <TableBody>
+        {trips.map((trip: Trip, index: number) => {
           return (
-            <TableRow className="h-16 cursor-pointer" key={trip.id} onClick={() => router.push(`/trip/${trip.id}`)}>
+            <TableRow
+              className="h-16 cursor-pointer"
+              key={trip.id}
+              onClick={() => router.push(`/trip/${trip.id}`)}
+            >
               <TableCell>{index + 1}</TableCell>
               <TableCell>{trip.start_location}</TableCell>
               <TableCell>{trip.end_location}</TableCell>

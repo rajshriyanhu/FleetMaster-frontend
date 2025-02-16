@@ -11,8 +11,10 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { useParams } from 'next/navigation';
 
 const ExpensePage = () => {
+  const params = useParams();
   const { setTitle } = useHeader();
   useEffect(() => {
     setTitle(
@@ -22,9 +24,9 @@ const ExpensePage = () => {
             <BreadcrumbItem>Vehicles</BreadcrumbItem>
           </BreadcrumbLink>
           <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Vehicle Details</BreadcrumbPage>
-          </BreadcrumbItem>
+          <BreadcrumbLink href={`/vehicle/${params.id as string}`}>
+            <BreadcrumbItem>Vehicle Details</BreadcrumbItem>
+          </BreadcrumbLink>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbPage>View all Expenses</BreadcrumbPage>

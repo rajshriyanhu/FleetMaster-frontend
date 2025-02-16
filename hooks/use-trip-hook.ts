@@ -1,6 +1,7 @@
 import { TripFormSchema } from "@/components/TripForm";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import { useDebounce } from "./use-debounce";
 
 axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
 axios.defaults.withCredentials = true;
@@ -23,11 +24,12 @@ export const useCreateTrip = () => {
   });
 };
 
-export function useGetAllTrips() {
+export function useGetAllTrips(page:number, limit:number,searchQuery:string, sortBy:string) {
+  const debouncedSearchQuery = useDebounce(searchQuery, 300); 
   return useQuery({
     queryKey: ["allTrips"],
     queryFn: async () => {
-      const response = await axios.get("/trip/");
+      const response = await axios.get(`/trip?page=${page}&limit=${limit}&search=${debouncedSearchQuery}&sortBy=${sortBy}`);
       return response.data;
     },
   });

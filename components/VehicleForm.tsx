@@ -31,7 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { indianStates } from "@/constants";
+import { IndianStates } from "@/constants";
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { Trash2, Upload } from "lucide-react";
 
@@ -369,7 +369,7 @@ const VehicleForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {indianStates.map((state, index) => {
+                        {IndianStates.map((state, index) => {
                           return (
                             <SelectItem key={index} value={state}>
                               {state}

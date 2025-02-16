@@ -59,7 +59,7 @@ const DriverPage = () => {
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams);
     params.set("page", page.toString());
-    router.push(`/customers?${params.toString()}`);
+    router.push(`/drivers?${params.toString()}`);
   };
 
   return (
