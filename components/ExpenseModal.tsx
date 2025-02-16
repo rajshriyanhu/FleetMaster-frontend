@@ -89,7 +89,7 @@ const ExpenseModal = ({
       form.setValue("type", expense.type);
       form.setValue("amount", expense.amount);
       form.setValue("date", new Date(expense.date));
-      form.setValue("file_url", expense.name);
+      form.setValue("file_url", expense.file_url);
     }
   }, [expense, form]);
 
@@ -111,7 +111,7 @@ const ExpenseModal = ({
         return;
       });
     const request: CreateExpenseRequest = {
-      name: fileName,
+      file_url: fileName,
       description: data.description,
       type: data.type,
       amount: data.amount,
@@ -399,7 +399,7 @@ const ExpenseModal = ({
                 <div>Document</div>
                 <div className="flex justify-between">
                   <Button
-                    onClick={() => downloadFile(expense.name)}
+                    onClick={() => downloadFile(expense.file_url)}
                     variant="ghost"
                     className="text-lg font-semibold"
                     type="button"

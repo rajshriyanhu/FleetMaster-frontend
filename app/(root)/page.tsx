@@ -55,21 +55,6 @@ const Dashboard = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-      {/* Vehicle Status Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Fleet Status</CardTitle>
-          <CardDescription>Current vehicle status</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <div>Active Vehicles: 15/20</div>
-            <div>Under Maintenance: 3</div>
-            <div>Out for Delivery: 12</div>
-            <div>Available: 5</div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Maintenance Alerts */}
       <Card>
@@ -82,21 +67,6 @@ const Dashboard = () => {
             <div className="text-red-500">Overdue: 2 vehicles</div>
             <div className="text-yellow-500">Due this week: 3 vehicles</div>
             <div>Next scheduled: 5 vehicles</div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Fuel Analytics */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Fuel Analytics</CardTitle>
-          <CardDescription>Monthly consumption & costs</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <div>Average MPG: 25.5</div>
-            <div>Total Fuel Cost: ₹2,450</div>
-            <div>Efficiency Rating: 85%</div>
           </div>
         </CardContent>
       </Card>
@@ -123,20 +93,6 @@ const Dashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Driver Status */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Driver Status</CardTitle>
-          <CardDescription>Active drivers & assignments</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <div>On Duty: 8 drivers</div>
-            <div>Off Duty: 4 drivers</div>
-            <div>On Break: 2 drivers</div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Performance Metrics */}
       <Card>

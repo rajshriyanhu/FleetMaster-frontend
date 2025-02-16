@@ -99,7 +99,7 @@ const AllExpenseTable = () => {
                 </TableCell>
                 <TableCell>{convertTimestampToDate(expense.date)}</TableCell>
                 <TableCell>{expense.amount}</TableCell>
-                <TableCell><Button onClick={() => downloadFile(expense.name)}>View</Button></TableCell>
+                <TableCell><Button onClick={() => downloadFile(expense.file_url)}>View</Button></TableCell>
                 <TableCell onClick={() => {}} className=" cursor-pointer">
                   <DropdownMenu>
                     <DropdownMenuTrigger className="flex items-center gap-2 px-4 py-2">

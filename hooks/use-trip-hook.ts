@@ -15,7 +15,8 @@ export const useCreateTrip = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (values: TripFormSchema) => {
-      const response = await axios.post("/trip/create", values);
+      const { vehicle_model, ...submitValues } = values;
+      const response = await axios.post("/trip/create", submitValues);
       return response.data;
     },
     onSuccess: () => {
@@ -49,7 +50,8 @@ export function useUpdateTrip() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, values }: UpdateTripParams) => {
-      const response = await axios.put(`/trip/${id}`, values);
+      const { vehicle_model, ...submitValues } = values;
+      const response = await axios.put(`/trip/${id}`, submitValues);
       return response.data;
     },
     onSuccess: (data, variables) => {

@@ -5,7 +5,7 @@ axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
 axios.defaults.withCredentials = true;
 
 export type CreateExpenseRequest = {
-    name: string;
+    file_url: string;
     description: string;
     amount: number;
     type: string;

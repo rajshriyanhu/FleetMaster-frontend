@@ -3,8 +3,6 @@ import { Poppins } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 import TanstackProvider from "@/providers/tanstack-provider";
 import "./globals.css";
-import UserContext from "@/providers/user-provider";
-import { useGetLoggedInUser } from "@/hooks/use-auth-hook";
 import UserProvider from "@/providers/user-provider";
 import { HeaderProvider } from "@/hooks/use-header";
 
@@ -15,8 +13,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Vehicle Management Services",
-  description: "",
+  title: "Fleet Master",
+  description: "Vehicle Management Software",
 };
 
 export default function RootLayout({

@@ -71,7 +71,7 @@ export enum ExpenseType {
 
 export type Expense = {
   id: string;
-  name: string;
+  file_url: string;
   description: string;
   vehicle_id: string;
   chassis_no: string;
@@ -137,8 +137,9 @@ export type Trip = {
   trip_type: string;
   vehicle: Vehicle;
   driver: Driver;
-  customer_name: string;
-  customer_number: string;
+  customer_id: string;
+  driver_id: string;
+  customer: Customer;
   start_date: string;
   end_date: string;
   days: number;

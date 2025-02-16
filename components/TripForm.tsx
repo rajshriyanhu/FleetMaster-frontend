@@ -28,22 +28,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { Driver, Trip, Vehicle } from "@/dto";
+import { Customer, Driver, Trip, Vehicle } from "@/dto";
 import { useGetAllDrivers } from "@/hooks/use-driver-hook";
 import { useGetAllVehicles } from "@/hooks/use-vehicle-hook";
-import { getDaysBetweenDates } from "@/lib/utils";
+import { cn, getDaysBetweenDates } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { useGetAllCustomers } from "@/hooks/use-customer-hook";
 
 const tripFormSchema = () => {
   return z.object({
     trip_type: z.string(),
     vehicle_id: z.string(),
+    vehicle_model: z.string(),
     driver_id: z.string().min(2, "Driver id is required"),
-    customer_name: z.string().min(2, "Customer name is required"),
-    customer_number: z
-      .string()
-      .min(10, "Phone number should be of 10 digits")
-      .max(10),
+    customer_id: z.string().min(2, "Driver id is required"),
+    // customer_name: z.string().min(2, "Customer name is required"),
+    // customer_number: z
+    //   .string()
+    //   .min(10, "Phone number should be of 10 digits")
+    //   .max(10),
     start_date: z.date(),
     end_date: z.date(),
     days: z.number(),
@@ -74,6 +77,13 @@ const TripForm = ({ trip }: { trip?: Trip }) => {
     "",
     "name"
   );
+  const { data: allCustomers, isError: customerError } = useGetAllCustomers(
+    1,
+    20,
+    "",
+    "name"
+  );
+
   const { data: allVehicle, isError: vehicleError } = useGetAllVehicles();
   const [errorMessage, setErrorMessage] = useState("");
   const { mutateAsync: createTrip, isPending: isLoading } = useCreateTrip();
@@ -95,8 +105,6 @@ const TripForm = ({ trip }: { trip?: Trip }) => {
       start_location: "",
       end_location: "",
       location_visited: "",
-      customer_name: "",
-      customer_number: "",
       start_km: undefined,
       end_km: undefined,
       days: undefined,
@@ -116,9 +124,9 @@ const TripForm = ({ trip }: { trip?: Trip }) => {
     if (!trip) return;
     form.setValue("trip_type", trip.trip_type);
     form.setValue("vehicle_id", trip.vehicle.id);
+    form.setValue("vehicle_model", trip.vehicle.model);
     form.setValue("driver_id", trip.driver.id);
-    form.setValue("customer_name", trip.customer_name);
-    form.setValue("customer_number", trip.customer_number);
+    form.setValue("customer_id", trip.customer_id);
     form.setValue("start_date", new Date(trip.start_date));
     form.setValue("end_date", new Date(trip.end_date));
     form.setValue("days", trip.days);
@@ -138,13 +146,12 @@ const TripForm = ({ trip }: { trip?: Trip }) => {
     form.setValue("profit", trip.profit);
   }, [trip]);
 
-  console.log(trip);
-
   const onSubmit = async (values: TripFormSchema) => {
     setErrorMessage("");
+    const { vehicle_model, ...submitValues } = values;
     console.log(values);
     if (trip) {
-      updateTrip({ id: trip.id, values })
+      await updateTrip({ id: trip.id, values })
         .then(() => {
           toast({
             title: "Trip details saved successfully",
@@ -160,7 +167,7 @@ const TripForm = ({ trip }: { trip?: Trip }) => {
       return;
     }
 
-    createTrip(values)
+    await createTrip(values)
       .then(() => {
         toast({
           title: "Trip created successfully",
@@ -256,186 +263,237 @@ const TripForm = ({ trip }: { trip?: Trip }) => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-8 w-full"
+        className="space-y-8 px-8 w-full"
       >
-        <FormField
-          name="trip_type"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">Trip Type</FormLabel>
-                <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
+        {/* Basic Trip Information */}
+        <div className="bg-white p-6 rounded-lg border shadow-sm">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900">
+            Basic Trip Information
+          </h3>
+          {/* Warning Messages */}
+          <div className="mb-4">
+            {(!allVehicle?.vehicles || allVehicle.vehicles.length === 0) && (
+              <p className="text-yellow-600 bg-yellow-50 p-2 rounded mb-2">
+                ⚠️ No vehicles available. You need at least one vehicle to
+                create a trip.
+              </p>
+            )}
+            {(!allDrivers?.data || allDrivers.data.length === 0) && (
+              <p className="text-yellow-600 bg-yellow-50 p-2 rounded mb-2">
+                ⚠️ No drivers available. You need at least one driver to create
+                a trip.
+              </p>
+            )}
+            {(!allCustomers?.data || allCustomers.data.length === 0) && (
+              <p className="text-yellow-600 bg-yellow-50 p-2 rounded mb-2">
+                ⚠️ No customers available. You need at least one customer to
+                create a trip.
+              </p>
+            )}
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <FormField
+              name="trip_type"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Trip Type</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select trip type" />
                       </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {tripType.map((trip: string) => {
-                        return (
+                      <SelectContent>
+                        {tripType.map((trip: string) => (
                           <SelectItem key={trip} value={trip}>
                             {trip}
                           </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {allVehicle && !vehicleError && (
-          <FormField
-            name="vehicle_id"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <div className="shad-form-item">
-                  <FormLabel className="shad-form-label">
-                    Select a Vehicle
-                  </FormLabel>
-                  <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a vehicle" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {allVehicle.vehicles.length > 0 ? (
-                          allVehicle.vehicles.map((vehicle: Vehicle) => {
-                            return (
-                              <SelectItem key={vehicle.id} value={vehicle.id}>
-                                {vehicle.registration_no}
-                              </SelectItem>
-                            );
-                          })
-                        ) : (
-                          <span className="px-2 text-sm">
-                            No vehicles added!
-                          </span>
-                        )}
+                        ))}
                       </SelectContent>
                     </Select>
                   </FormControl>
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        {allDrivers && !driverError && (
-          <FormField
-            name="driver_id"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <div className="shad-form-item">
-                  <FormLabel className="shad-form-label">
-                    Select driver
-                  </FormLabel>
-                  <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+            {allVehicle && !vehicleError && (
+              <>
+                <FormField
+                  name="vehicle_model"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Select Vehicle Model</FormLabel>
                       <FormControl>
+                        <Select
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            // Reset vehicle selection when model changes
+                            form.setValue("vehicle_id", "");
+                          }}
+                          defaultValue={field.value}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select vehicle model" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {/* Ensure TypeScript understands the type of model */}
+                            {Array.from(
+                              new Set(
+                                allVehicle.vehicles.map((v: Vehicle) => v.model)
+                              )
+                            ).map((model) => (
+                              <SelectItem
+                                key={String(model)}
+                                value={String(model)}
+                              >
+                                {String(model)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  name="vehicle_id"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Select Vehicle</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          disabled={!form.watch("vehicle_model")}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a vehicle" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {allVehicle.vehicles
+                              .filter(
+                                (v: Vehicle) =>
+                                  v.model === form.watch("vehicle_model")
+                              )
+                              .map((vehicle: Vehicle) => (
+                                <SelectItem key={vehicle.id} value={vehicle.id}>
+                                  {vehicle.registration_no}
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
+
+            {allDrivers && allDrivers.data && !driverError && (
+              <FormField
+                name="driver_id"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Select driver</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Select a driver" />
                         </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {allDrivers.length > 0 ? (
-                          allDrivers.map((driver: Driver) => {
-                            return (
+                        <SelectContent>
+                          {allDrivers?.data.length > 0 ? (
+                            allDrivers?.data.map((driver: Driver) => (
                               <SelectItem key={driver.id} value={driver.id}>
                                 {driver.name}
                               </SelectItem>
-                            );
-                          })
-                        ) : (
-                          <span className="px-2 text-sm">
-                            No drivers added!
-                          </span>
-                        )}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage className="shad-form-message" />
-                </div>
-              </FormItem>
+                            ))
+                          ) : (
+                            <span className="px-2 text-sm">
+                              No drivers added!
+                            </span>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
-          />
-        )}
 
-        <FormField
-          control={form.control}
-          name="customer_name"
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">Customer Name</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Name of the customer"
-                    className="shad-input"
-                    {...field}
-                  />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+            {allCustomers && allCustomers.data && !customerError && (
+              <FormField
+                name="customer_id"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Select driver</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a customer" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {allCustomers.data.length > 0 ? (
+                            allCustomers.data.map((customer: Customer) => (
+                              <SelectItem key={customer.id} value={customer.id}>
+                                {customer.name}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <span className="px-2 text-sm">
+                              No customer added!
+                            </span>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+          </div>
+        </div>
 
-        <FormField
-          control={form.control}
-          name="customer_number"
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  Customer Phone Number
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Phone number"
-                    className="shad-input"
-                    {...field}
-                  />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="start_date"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  Starting Date of Trip
-                </FormLabel>
-                <div className="border rounded-md w-full">
+        {/* Trip Schedule */}
+        <div className="bg-white p-6 rounded-lg border shadow-sm">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900">
+            Trip Schedule
+          </h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <FormField
+              control={form.control}
+              name="start_date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Starting Date of Trip</FormLabel>
                   <Popover open={calendarOpen1} onOpenChange={setCalendarOpen1}>
                     <PopoverTrigger className="w-full" asChild>
                       <FormControl>
-                        <Button variant="ghost">
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
                           {field.value ? (
                             format(field.value, "PPP")
                           ) : (
@@ -460,27 +518,27 @@ const TripForm = ({ trip }: { trip?: Trip }) => {
                       />
                     </PopoverContent>
                   </Popover>
-                </div>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="end_date"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  Ending Date of Trip
-                </FormLabel>
-                <div className="border rounded-md w-full">
+            <FormField
+              control={form.control}
+              name="end_date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Ending Date of Trip</FormLabel>
                   <Popover open={calendarOpen2} onOpenChange={setCalendarOpen2}>
                     <PopoverTrigger className="w-full" asChild>
                       <FormControl>
-                        <Button variant="ghost">
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
                           {field.value ? (
                             format(field.value, "PPP")
                           ) : (
@@ -505,418 +563,412 @@ const TripForm = ({ trip }: { trip?: Trip }) => {
                       />
                     </PopoverContent>
                   </Popover>
-                </div>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="days"
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  Number of Days
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    className="shad-input"
-                    {...field}
-                    readOnly
-                    placeholder="Trip days"
-                    onChange={(e) => {
-                      field.onChange(
-                        e.target.value ? Number(e.target.value) : ""
-                      );
-                    }}
-                  />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="days"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Number of Days</FormLabel>
+                  <FormControl>
+                    <Input
+                      className="shad-input"
+                      {...field}
+                      readOnly
+                      placeholder="Trip days"
+                      onChange={(e) => {
+                        field.onChange(
+                          e.target.value ? Number(e.target.value) : ""
+                        );
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
 
-        <FormField
-          control={form.control}
-          name="start_location"
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  Start Location
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Enter start location"
-                    className="shad-input"
-                    {...field}
-                  />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+        {/* Location Details */}
+        <div className="bg-white p-6 rounded-lg border shadow-sm">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900">
+            Location Details
+          </h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Start Location, End Location, Locations Visited */}
+            <FormField
+              control={form.control}
+              name="start_location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Start Location</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter start location" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="end_location"
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">End Location</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Write your destination"
-                    className="shad-input"
-                    {...field}
-                  />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="end_location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>End Location</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Write your destination" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="location_visited"
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  Location Visited
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Visited location during trips"
-                    className="shad-input"
-                    {...field}
-                  />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="location_visited"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Location Visited</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Visited location during trips"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
 
-        <FormField
-          control={form.control}
-          name="start_km"
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">Start Kms</FormLabel>
-                <FormControl>
-                  <Input
-                    className="shad-input"
-                    {...field}
-                    value={field.value ?? ""}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      field.onChange(value === "" ? undefined : Number(value));
-                    }}
-                    placeholder="KM at start of trip"
-                  />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+        {/* Distance Tracking */}
+        <div className="bg-white p-6 rounded-lg border shadow-sm">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900">
+            Distance Tracking
+          </h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Start KM, End KM, Total KM */}
+            <FormField
+              control={form.control}
+              name="start_km"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Start Kms</FormLabel>
+                  <FormControl>
+                    <Input
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(
+                          value === "" ? undefined : Number(value)
+                        );
+                      }}
+                      placeholder="KM at start of trip"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="end_km"
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">End Kms</FormLabel>
-                <FormControl>
-                  <Input
-                    className="shad-input"
-                    {...field}
-                    value={field.value ?? ""}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      field.onChange(value === "" ? undefined : Number(value));
-                    }}
-                    placeholder="KM at end of trip"
-                  />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="end_km"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>End Kms</FormLabel>
+                  <FormControl>
+                    <Input
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(
+                          value === "" ? undefined : Number(value)
+                        );
+                      }}
+                      placeholder="KM at end of trip"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="total_km"
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">Total Kms run</FormLabel>
-                <FormControl>
-                  <Input
-                    className="shad-input"
-                    {...field}
-                    readOnly
-                    onChange={(e) => {
-                      field.onChange(
-                        e.target.value ? Number(e.target.value) : ""
-                      );
-                    }}
-                    placeholder="Total KM run during the trip"
-                  />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="total_km"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Total Kms run</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      readOnly
+                      onChange={(e) => {
+                        field.onChange(
+                          e.target.value ? Number(e.target.value) : ""
+                        );
+                      }}
+                      placeholder="Total KM run during the trip"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
 
-        <FormField
-          control={form.control}
-          name="total_fuel_cost"
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  Total fuel cost (₹)
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    className="shad-input"
-                    {...field}
-                    value={
-                      field.value !== undefined && field.value !== null
-                        ? `₹${new Intl.NumberFormat("en-IN").format(field.value)}`
-                        : ""
-                    }
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/₹|,/g, "");
-                      field.onChange(value === "" ? undefined : Number(value));
-                    }}
-                  />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+        {/* Cost Details */}
+        <div className="bg-white p-6 rounded-lg border shadow-sm">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900">
+            Cost Details
+          </h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* All cost related fields */}
+            <FormField
+              control={form.control}
+              name="total_fuel_cost"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Total fuel cost (₹)</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      value={
+                        field.value !== undefined && field.value !== null
+                          ? `₹${new Intl.NumberFormat("en-IN").format(field.value)}`
+                          : ""
+                      }
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/₹|,/g, "");
+                        field.onChange(
+                          value === "" ? undefined : Number(value)
+                        );
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="average_fuel_cost"
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  Average Fuel Cost (₹)
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    className="shad-input"
-                    {...field}
-                    value={
-                      field.value !== undefined && field.value !== null
-                        ? `₹${new Intl.NumberFormat("en-IN").format(field.value)}`
-                        : ""
-                    }
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/₹|,/g, "");
-                      field.onChange(value === "" ? undefined : Number(value));
-                    }}
-                  />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="average_fuel_cost"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Average Fuel Cost (₹)</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      value={
+                        field.value !== undefined && field.value !== null
+                          ? `₹${new Intl.NumberFormat("en-IN").format(field.value)}`
+                          : ""
+                      }
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/₹|,/g, "");
+                        field.onChange(
+                          value === "" ? undefined : Number(value)
+                        );
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="vehicle_average"
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  Vehicle average
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    className="shad-input"
-                    {...field}
-                    value={field.value ?? ""}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      field.onChange(value === "" ? undefined : Number(value));
-                    }}
-                  />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="vehicle_average"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Vehicle average</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(
+                          value === "" ? undefined : Number(value)
+                        );
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="state_tax"
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  Total State Tax (₹)
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    className="shad-input"
-                    {...field}
-                    value={
-                      field.value !== undefined && field.value !== null
-                        ? `₹${new Intl.NumberFormat("en-IN").format(field.value)}`
-                        : ""
-                    }
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/₹|,/g, "");
-                      field.onChange(value === "" ? undefined : Number(value));
-                    }}
-                  />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="state_tax"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Total State Tax (₹)</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      value={
+                        field.value !== undefined && field.value !== null
+                          ? `₹${new Intl.NumberFormat("en-IN").format(field.value)}`
+                          : ""
+                      }
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/₹|,/g, "");
+                        field.onChange(
+                          value === "" ? undefined : Number(value)
+                        );
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="toll_tax"
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  Total Toll (₹)
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    className="shad-input"
-                    {...field}
-                    value={
-                      field.value !== undefined && field.value !== null
-                        ? `₹${new Intl.NumberFormat("en-IN").format(field.value)}`
-                        : ""
-                    }
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/₹|,/g, "");
-                      field.onChange(value === "" ? undefined : Number(value));
-                    }}
-                  />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="toll_tax"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Total Toll (₹)</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      value={
+                        field.value !== undefined && field.value !== null
+                          ? `₹${new Intl.NumberFormat("en-IN").format(field.value)}`
+                          : ""
+                      }
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/₹|,/g, "");
+                        field.onChange(
+                          value === "" ? undefined : Number(value)
+                        );
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="permit"
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  Total Permit (₹)
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    className="shad-input"
-                    {...field}
-                    value={
-                      field.value !== undefined && field.value !== null
-                        ? `₹${new Intl.NumberFormat("en-IN").format(field.value)}`
-                        : ""
-                    }
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/₹|,/g, "");
-                      field.onChange(value === "" ? undefined : Number(value));
-                    }}
-                  />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="permit"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Total Permit (₹)</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      value={
+                        field.value !== undefined && field.value !== null
+                          ? `₹${new Intl.NumberFormat("en-IN").format(field.value)}`
+                          : ""
+                      }
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/₹|,/g, "");
+                        field.onChange(
+                          value === "" ? undefined : Number(value)
+                        );
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="maintainance"
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">
-                  Total Cost (₹)
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    className="shad-input"
-                    {...field}
-                    value={
-                      field.value !== undefined && field.value !== null
-                        ? `₹${new Intl.NumberFormat("en-IN").format(field.value)}`
-                        : ""
-                    }
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/₹|,/g, "");
-                      field.onChange(value === "" ? undefined : Number(value));
-                    }}
-                  />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="maintainance"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Total Cost (₹)</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      value={
+                        field.value !== undefined && field.value !== null
+                          ? `₹${new Intl.NumberFormat("en-IN").format(field.value)}`
+                          : ""
+                      }
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/₹|,/g, "");
+                        field.onChange(
+                          value === "" ? undefined : Number(value)
+                        );
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          control={form.control}
-          name="profit"
-          render={({ field }) => (
-            <FormItem>
-              <div className="shad-form-item">
-                <FormLabel className="shad-form-label">Profit (₹)</FormLabel>
-                <FormControl>
-                  <Input
-                    className="shad-input"
-                    {...field}
-                    value={
-                      field.value !== undefined && field.value !== null
-                        ? `₹${new Intl.NumberFormat("en-IN").format(field.value)}`
-                        : ""
-                    }
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/₹|,/g, "");
-                      field.onChange(value === "" ? undefined : Number(value));
-                    }}
-                  />
-                </FormControl>
-              </div>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="profit"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Profit (₹)</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      value={
+                        field.value !== undefined && field.value !== null
+                          ? `₹${new Intl.NumberFormat("en-IN").format(field.value)}`
+                          : ""
+                      }
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/₹|,/g, "");
+                        field.onChange(
+                          value === "" ? undefined : Number(value)
+                        );
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
 
-        <Button disabled={isLoading || isUpdatingLoading}>
-          {trip ? "Save" : "Create Trip"}
-        </Button>
+        {/* Form Actions */}
+        <div className="flex justify-end gap-4">
+          <Button type="button" variant="outline" onClick={() => router.back()}>
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            className="min-w-[120px]"
+            disabled={isLoading || isUpdatingLoading}
+          >
+            {isLoading || isUpdatingLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                {trip ? "Saving..." : "Creating..."}
+              </div>
+            ) : trip ? (
+              "Save Changes"
+            ) : (
+              "Create Trip"
+            )}
+          </Button>
+        </div>
       </form>
     </Form>
   );
