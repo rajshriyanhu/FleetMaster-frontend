@@ -50,7 +50,7 @@ const driverFormSchema = () => {
     alt_phone_number: z.string(),
     emg_name: z.string(),
     emg_relation: z.string(),
-    document_url: z.string(),
+    document_url: z.string().optional(),
     emg_phone_number: z.string(),
     insurance_valid_upto: z.date(),
     joining_date: z.date(),
@@ -150,24 +150,35 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
       });
   };
 
-  const onSubmit = (data: DriverFormType) => {
+  const onSubmit = async (data: DriverFormType) => {
     console.log(data);
     if (!document) {
       return;
     }
+    const uploadpromise = [];
     const uniqueId = uuidv4();
     const fileName = `${uniqueId}_${document.name}`;
-    uploadFile(fileName, document)
-      .then((res) => {
-          form.setValue("document_url", res.filename);
+    uploadpromise.push(
+      uploadFile(fileName, document).then((res) => {
+        form.setValue("document_url", fileName);
+        data.document_url = fileName;
       })
       .catch((err) => {
         toast({
           title: "Failed to upload document",
           variant: "destructive",
+          description: "Please try again later.",
         });
         return;
-      });
+      })
+    );
+
+    await Promise.all(uploadpromise);
+
+    toast({
+      title: "All documents uploaded Successfully!",
+    });
+
     if (driver) {
       updateDriver({ id: driver.id, values: data })
         .then(() => {
@@ -184,7 +195,7 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
         });
       return;
     }
-    createDriver(data)
+    await createDriver(data)
       .then(() => {
         toast({
           title: "Driver added successfully",
@@ -442,46 +453,45 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
               </div>
             ) : (
               <FormItem>
-              
-                <FormLabel>
-                  Upload Document
-                </FormLabel>
+                <FormLabel>Upload Document</FormLabel>
                 <div className="flex items-center gap-2">
-                    <Input
-                      id="puc-upload"
-                      type="file"
-                      className="hidden"
-                      ref={inputRef}
-                      onChange={(e) =>
-                        setDocument(e.target.files ? e.target.files[0] : null)
-                      }
-                    />
-                    <FormControl>
-                      <label
-                        htmlFor="puc-upload"
-                        className="flex w-full h-[2.3rem] cursor-pointer items-center justify-between rounded-md border px-3 py-2"
-                      >
-                        <span>{document ? document.name : "Click here to upload"}</span>
-                        {!document && <Upload className="h-4 w-4" />}
-                      </label>
-                    </FormControl>
-                    {document && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          setDocument(null);
-                          if (inputRef.current) {
-                            inputRef.current.value = "";
-                          }
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                  <FormMessage />
+                  <Input
+                    id="puc-upload"
+                    type="file"
+                    className="hidden"
+                    ref={inputRef}
+                    onChange={(e) =>
+                      setDocument(e.target.files ? e.target.files[0] : null)
+                    }
+                  />
+                  <FormControl>
+                    <label
+                      htmlFor="puc-upload"
+                      className="flex w-full h-[2.3rem] cursor-pointer items-center justify-between rounded-md border px-3 py-2"
+                    >
+                      <span>
+                        {document ? document.name : "Click here to upload"}
+                      </span>
+                      {!document && <Upload className="h-4 w-4" />}
+                    </label>
+                  </FormControl>
+                  {document && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setDocument(null);
+                        if (inputRef.current) {
+                          inputRef.current.value = "";
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                <FormMessage />
               </FormItem>
             )}
           </div>
