@@ -121,6 +121,7 @@ export type Driver = {
   employment_status: string;
   dl_number: string;
   experience: number;
+  document_url: string;
   expertise: string;
   address: Address;
   address_id: string;

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { Driver } from "@/dto";
 import { Button } from "./ui/button";
@@ -12,6 +12,7 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
+import { v4 as uuidv4 } from "uuid";
 import { Input } from "./ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,7 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useCreateDriver, useUpdateDriver } from "@/hooks/use-driver-hook";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Trash2, Upload } from "lucide-react";
 import { Calendar } from "./ui/calendar";
 import {
   Select,
@@ -31,6 +32,8 @@ import {
 import { IndianStates } from "@/constants";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { downloadFile } from "@/hooks/use-fle-donwload";
+import { useFileUpload } from "@/hooks/use-file-upload";
 
 const alphabetOnlyRegex = /^[A-Za-z\s]+$/;
 
@@ -47,6 +50,7 @@ const driverFormSchema = () => {
     alt_phone_number: z.string(),
     emg_name: z.string(),
     emg_relation: z.string(),
+    document_url: z.string(),
     emg_phone_number: z.string(),
     insurance_valid_upto: z.date(),
     joining_date: z.date(),
@@ -83,16 +87,20 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
   const { mutateAsync: createDriver, isPending } = useCreateDriver();
   const { mutateAsync: updateDriver, isPending: isUpdatingDriver } =
     useUpdateDriver();
+  const uploadFile = useFileUpload();
+  const [document, setDocument] = useState<File | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const form = useForm<DriverFormType>({
     resolver: zodResolver(driverFormSchema()),
     defaultValues: {
       name: "",
       email: "",
-      phone_number: '',
-      alt_phone_number: '',
+      phone_number: "",
+      alt_phone_number: "",
       emg_name: "",
       emg_relation: "",
-      emg_phone_number: '',
+      emg_phone_number: "",
       dl_number: "",
       experience: undefined,
       street: "",
@@ -115,21 +123,62 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
     }
   }, [driver, form]);
 
-  console.log(form.formState.errors)
+  console.log(form.formState.errors);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !e.target.files[0]) {
+      toast({
+        title: "Failed to upload file",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+      return;
+    }
+    uploadFile(`${driver?.document_url}`, e.target.files[0])
+      .then(() => {
+        toast({
+          title: "File uploaded successfully!",
+        });
+      })
+      .catch((err) => {
+        toast({
+          title: "Failed to upload document",
+          variant: "destructive",
+        });
+        console.log(err);
+        return;
+      });
+  };
 
   const onSubmit = (data: DriverFormType) => {
     console.log(data);
+    if (!document) {
+      return;
+    }
+    const uniqueId = uuidv4();
+    const fileName = `${uniqueId}_${document.name}`;
+    uploadFile(fileName, document)
+      .then((res) => {
+          form.setValue("document_url", res.filename);
+      })
+      .catch((err) => {
+        toast({
+          title: "Failed to upload document",
+          variant: "destructive",
+        });
+        return;
+      });
     if (driver) {
       updateDriver({ id: driver.id, values: data })
         .then(() => {
           toast({
-            title: "Customer details saved successfully",
+            title: "Driver details saved successfully",
           });
         })
         .catch((err) => {
           toast({
             title: "Uh Oh! Something went wrong",
-            description: `Failed to update customer details, ${err.message}`,
+            description: `Failed to update driver details, ${err.message}`,
             variant: "destructive",
           });
         });
@@ -140,7 +189,7 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
         toast({
           title: "Driver added successfully",
         });
-        router.push('/drivers?page=1&limit=10')
+        router.push("/drivers?page=1&limit=10");
         form.reset();
       })
       .catch((err) => {
@@ -181,7 +230,10 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
     }
 
     if (altPhone) {
-      if (altPhone.length > 0 && (altPhone.length !== 10 || !/^\d+$/.test(altPhone))) {
+      if (
+        altPhone.length > 0 &&
+        (altPhone.length !== 10 || !/^\d+$/.test(altPhone))
+      ) {
         form.setError("alt_phone_number", {
           type: "manual",
           message: "Phone number must be exactly 10 digits.",
@@ -190,7 +242,7 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
         form.clearErrors("alt_phone_number");
       }
     }
-  
+
     if (emgPhone) {
       if (emgPhone && (emgPhone.length !== 10 || !/^\d+$/.test(emgPhone))) {
         form.setError("emg_phone_number", {
@@ -205,10 +257,15 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full px-8">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-8 w-full px-8"
+      >
         {/* Personal Information */}
         <div className="bg-white p-6 rounded-lg border shadow-sm ">
-          <h3 className="text-lg font-semibold mb-4 text-gray-900">Personal Information</h3>
+          <h3 className="text-lg font-semibold mb-4 text-gray-900">
+            Personal Information
+          </h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <FormField
               name="name"
@@ -231,7 +288,11 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
                 <FormItem>
                   <FormLabel>Email Address</FormLabel>
                   <FormControl>
-                    <Input placeholder="email@example.com" type="email" {...field} />
+                    <Input
+                      placeholder="email@example.com"
+                      type="email"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -259,96 +320,178 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
                 <FormItem>
                   <FormLabel>Alternative Phone</FormLabel>
                   <FormControl>
-                    <Input placeholder="Alternative contact number" {...field} />
+                    <Input
+                      placeholder="Alternative contact number"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <FormField
-          name="working_region"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-                <FormLabel >
-                  Working Region
+              name="working_region"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Working Region</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      // defaultValue={vehicle ? vehicle.region : field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select region" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="West">West</SelectItem>
+                        <SelectItem value="East">East</SelectItem>
+                        <SelectItem value="North">North</SelectItem>
+                        <SelectItem value="South">South</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="working_state"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Working State</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      // defaultValue={vehicle ? vehicle.state : field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select working state" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {IndianStates.map((state, index) => {
+                          return (
+                            <SelectItem key={index} value={state}>
+                              {state}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              name="working_city"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Working City</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {driver ? (
+              <div className="flex justify-between items-center px-2 border rounded-md gap-4 bg-white">
+                <div>Document</div>
+                <div className="flex justify-between">
+                  <Button
+                    onClick={() => downloadFile(driver.document_url)}
+                    variant="ghost"
+                    className="text-lg font-semibold"
+                    type="button"
+                  >
+                    View
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="text-lg font-semibold"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <Input
+                        id="upload"
+                        className="hidden"
+                        type="file"
+                        onChange={(e) => handleFileUpload(e)}
+                      />
+                      <label
+                        htmlFor="upload"
+                        className="rounded-md px-2 py-[5px] w-full flex items-center gap-4 cursor-pointer"
+                      >
+                        <div className="w-full flex items-center justify-between gap-2">
+                          Replace <Upload />
+                        </div>
+                      </label>
+                    </div>
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <FormItem>
+              
+                <FormLabel>
+                  Upload Document
                 </FormLabel>
-                <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    // defaultValue={vehicle ? vehicle.region : field.value}
-                  >
+                <div className="flex items-center gap-2">
+                    <Input
+                      id="puc-upload"
+                      type="file"
+                      className="hidden"
+                      ref={inputRef}
+                      onChange={(e) =>
+                        setDocument(e.target.files ? e.target.files[0] : null)
+                      }
+                    />
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select region" />
-                      </SelectTrigger>
+                      <label
+                        htmlFor="puc-upload"
+                        className="flex w-full h-[2.3rem] cursor-pointer items-center justify-between rounded-md border px-3 py-2"
+                      >
+                        <span>{document ? document.name : "Click here to upload"}</span>
+                        {!document && <Upload className="h-4 w-4" />}
+                      </label>
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="West">West</SelectItem>
-                      <SelectItem value="East">East</SelectItem>
-                      <SelectItem value="North">North</SelectItem>
-                      <SelectItem value="South">South</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="working_state"
-          render={({ field }) => (
-            <FormItem>
-                <FormLabel>Working State</FormLabel>
-                <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    // defaultValue={vehicle ? vehicle.state : field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select working state" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {IndianStates.map((state, index) => {
-                        return (
-                          <SelectItem key={index} value={state}>
-                            {state}
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          name="working_city"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-                <FormLabel>Working City</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                    {document && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setDocument(null);
+                          if (inputRef.current) {
+                            inputRef.current.value = "";
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                  <FormMessage />
+              </FormItem>
+            )}
           </div>
         </div>
 
         {/* Emergency Contact */}
         <div className="bg-white p-6 rounded-lg border shadow-sm">
-          <h3 className="text-lg font-semibold mb-4 text-gray-900">Emergency Contact</h3>
+          <h3 className="text-lg font-semibold mb-4 text-gray-900">
+            Emergency Contact
+          </h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <FormField
               name="emg_name"
@@ -396,7 +539,9 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
 
         {/* Professional Details */}
         <div className="bg-white p-6 rounded-lg border shadow-sm">
-          <h3 className="text-lg font-semibold mb-4 text-gray-900">Professional Details</h3>
+          <h3 className="text-lg font-semibold mb-4 text-gray-900">
+            Professional Details
+          </h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <FormField
               control={form.control}
@@ -414,7 +559,9 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
                             !field.value && "text-muted-foreground"
                           )}
                         >
-                          {field.value ? format(field.value, "PPP") : "Select date"}
+                          {field.value
+                            ? format(field.value, "PPP")
+                            : "Select date"}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>
@@ -465,7 +612,9 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
                       value={field.value ?? ""}
                       onChange={(e) => {
                         const value = e.target.value;
-                        field.onChange(value === "" ? undefined : Number(value));
+                        field.onChange(
+                          value === "" ? undefined : Number(value)
+                        );
                       }}
                     />
                   </FormControl>
@@ -496,19 +645,21 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
               )}
             />
             <FormField
-          control={form.control}
-          name="joining_date"
-          render={({ field }) => (
-            <FormItem >
-                <FormLabel >Joining Date</FormLabel>
+              control={form.control}
+              name="joining_date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Joining Date</FormLabel>
                   <Popover open={calendarOpen2} onOpenChange={setCalendarOpen2}>
                     <PopoverTrigger className="w-full" asChild>
                       <FormControl>
-                        <Button variant="outline"
+                        <Button
+                          variant="outline"
                           className={cn(
                             "w-full pl-3 text-left font-normal",
                             !field.value && "text-muted-foreground"
-                          )}>
+                          )}
+                        >
                           {field.value ? (
                             format(field.value, "PPP")
                           ) : (
@@ -533,25 +684,27 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
                       />
                     </PopoverContent>
                   </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
-          control={form.control}
-          name="exit_date"
-          render={({ field }) => (
-            <FormItem >
-                <FormLabel >Exit Date</FormLabel>
+              control={form.control}
+              name="exit_date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Exit Date</FormLabel>
                   <Popover open={calendarOpen3} onOpenChange={setCalendarOpen3}>
                     <PopoverTrigger className="w-full" asChild>
                       <FormControl>
-                        <Button variant="outline"
+                        <Button
+                          variant="outline"
                           className={cn(
                             "w-full pl-3 text-left font-normal",
                             !field.value && "text-muted-foreground"
-                          )}>
+                          )}
+                        >
                           {field.value ? (
                             format(field.value, "PPP")
                           ) : (
@@ -576,45 +729,45 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
                       />
                     </PopoverContent>
                   </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <FormField
-          name="employment_status"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-                <FormLabel>
-                  Employement Status
-                </FormLabel>
-                <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    // defaultValue={vehicle ? vehicle.region : field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Active">Active</SelectItem>
-                      <SelectItem value="Non-Active">Non Active</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-              <FormMessage className="shad-form-message" />
-            </FormItem>
-          )}
-        />
+            <FormField
+              name="employment_status"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Employement Status</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      // defaultValue={vehicle ? vehicle.region : field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Active">Active</SelectItem>
+                        <SelectItem value="Non-Active">Non Active</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage className="shad-form-message" />
+                </FormItem>
+              )}
+            />
           </div>
         </div>
 
         {/* Address Details */}
         <div className="bg-white p-6 rounded-lg border shadow-sm">
-          <h3 className="text-lg font-semibold mb-4 text-gray-900">Residential Address</h3>
+          <h3 className="text-lg font-semibold mb-4 text-gray-900">
+            Residential Address
+          </h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <FormField
               name="street"
@@ -623,7 +776,10 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
                 <FormItem className="col-span-full">
                   <FormLabel>Street Address</FormLabel>
                   <FormControl>
-                    <Input placeholder="Flat no., Building name, Street" {...field} />
+                    <Input
+                      placeholder="Flat no., Building name, Street"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -682,7 +838,9 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
                       value={field.value ?? ""}
                       onChange={(e) => {
                         const value = e.target.value;
-                        field.onChange(value === "" ? undefined : Number(value));
+                        field.onChange(
+                          value === "" ? undefined : Number(value)
+                        );
                       }}
                     />
                   </FormControl>
@@ -695,14 +853,10 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
 
         {/* Form Actions */}
         <div className="flex justify-end gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.back()}
-          >
+          <Button type="button" variant="outline" onClick={() => router.back()}>
             Cancel
           </Button>
-          <Button 
+          <Button
             type="submit"
             className="min-w-[120px]"
             disabled={isPending || isUpdatingDriver}
@@ -712,8 +866,10 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                 {driver ? "Saving..." : "Creating..."}
               </div>
+            ) : driver ? (
+              "Save Changes"
             ) : (
-              driver ? "Save Changes" : "Create Driver"
+              "Create Driver"
             )}
           </Button>
         </div>
