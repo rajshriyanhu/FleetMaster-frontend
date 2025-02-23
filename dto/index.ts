@@ -162,3 +162,41 @@ export type Trip = {
   updated_at: string;
   deleted: boolean;
 };
+
+export type DashboardVehicle = {
+  asset_no: number;
+  capacity: number;
+  chassis_no: string;
+  color: string;
+  created_at: string;
+  deleted: boolean;
+  engine_no: string;
+  fitness_url: string;
+  fitness_validity: string;
+  fuel_type: string;
+  id: string;
+  insurance_url: string;
+  insurance_validity: string;
+  last_battery_change: string;
+  last_service: string;
+  last_service_kms: number;
+  city: string;
+  km_run: number;
+  manufacturing_date: string;
+  registration_date: string;
+  model: string;
+  next_service_due: string;
+  next_service_due_kms: number;
+  puc_url: string;
+  rc_url: string;
+  puc_validity: string;
+  region: string;
+  registration_no: string;
+  state: string;
+  transmission_type: string;
+  updated_at: string;
+  gps_renewal_due: string;
+  variant: string;
+  make: string;
+  dueTasks: string[];
+}

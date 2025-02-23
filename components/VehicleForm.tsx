@@ -165,7 +165,9 @@ const VehicleForm = ({
     form.setValue("capacity", vehicle.capacity);
     form.setValue("color", vehicle.color);
     form.setValue("asset_no", vehicle.asset_no);
+    form.setValue("km_run", vehicle.km_run);
     form.setValue("manufacturing_date", new Date(vehicle.manufacturing_date));
+    form.setValue("registration_date", new Date(vehicle.registration_date));
     form.setValue("insurance_validity", new Date(vehicle.insurance_validity));
     form.setValue("puc_validity", new Date(vehicle.puc_validity));
     form.setValue("fitness_validity", new Date(vehicle.fitness_validity));
@@ -280,6 +282,8 @@ const VehicleForm = ({
       }
     }
   }, [lastServiceKM, nextServiceDueKM, form]);
+
+  console.log(vehicle)
 
   return (
     <>

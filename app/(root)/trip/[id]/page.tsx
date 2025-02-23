@@ -17,6 +17,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useHeader } from "@/hooks/use-header";
+import { Button } from "@/components/ui/button";
 
 const TripDetailsPage = () => {
   const params = useParams();
@@ -67,14 +68,31 @@ const TripDetailsPage = () => {
     router.push(`/trip/${trip.id}/edit`)
   }
 
+  console.log(trip)
+
   return (
     <div className="flex-col justify-center space-y-8">
       <div className="flex w-full justify-between">
         <p className="text-brand text-3xl font-bold">Trip Details</p>
-        <div className="flex gap-4">
-          <Pencil1Icon className="size-8 cursor-pointer" onClick={handleEditTrip} />
-          <TrashIcon className="size-8 cursor-pointer text-rose-800" onClick={handleDeleteTrip} />
+        <div className="flex items-center gap-3">
+        <Button
+            variant="outline"
+            className="flex items-center gap-2"
+            onClick={handleEditTrip}
+          >
+            <Pencil1Icon className="h-4 w-4" /> Edit
+          </Button>
+
+          <Button
+            variant="destructive"
+            className="flex items-center gap-2"
+            onClick={handleDeleteTrip}
+          >
+            <TrashIcon className="h-4 w-4" />
+            Delete
+          </Button>
         </div>
+        
       </div>
       <div className="flex w-2/3 mx-auto flex-col justify-center space-y-3 rounded-xl bg-white p-8">
       <div className="grid grid-cols-2 gap-4">
@@ -94,12 +112,12 @@ const TripDetailsPage = () => {
         <Separator />
         <div className="grid grid-cols-2 gap-4">
           <div>Customer Name</div>
-          <div className="text-lg font-semibold">{trip.customer_name}</div>
+          <div className="text-lg font-semibold">{trip.customer.name}</div>
         </div>
         <Separator />
         <div className="grid grid-cols-2 gap-4">
           <div>Customer&apos;s Phone number</div>
-          <div className="text-lg font-semibold">{trip.customer_number}</div>
+          <div className="text-lg font-semibold">{trip.customer.phone_number}</div>
         </div>
         <Separator />
         <div className="grid grid-cols-2 gap-4">

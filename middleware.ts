@@ -1,15 +1,35 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { jwtVerify } from 'jose';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
     const token = request.cookies.get('accessToken');
-    console.log(token)
-    if (!token) {
+    const isAuthPage = request.nextUrl.pathname === '/sign-in' || request.nextUrl.pathname === '/sign-up';
+    
+    // If user is logged in and trying to access sign-in page
+    if (token && isAuthPage) {
+        return NextResponse.redirect(new URL('/', request.url));
+    }
+
+    // If user is not logged in and trying to access protected routes
+    if (!token && !isAuthPage) {
         return NextResponse.redirect(new URL('/sign-in', request.url));
     }
-    return NextResponse.next();
+
+    try {
+        const secret = new TextEncoder().encode(process.env.NEXT_PUBLIC_JWT_SECRET);
+        const verify = await jwtVerify(token?.value || '', secret);
+        console.log(verify)
+        return NextResponse.next();
+    } catch (error) {
+        // Token is invalid or expired
+        if (!isAuthPage) {
+            return NextResponse.redirect(new URL('/sign-in', request.url));
+        }
+        return NextResponse.next();
+    }
 }
 
 export const config = {
-    matcher: ['/', '/customers/:path*', '/drivers/:path*', '/trip/:path*', '/vehicle/:path*', '/forms/:path*', '/users/:path*'],
+    matcher: ['/', '/sign-in', '/customers/:path*', '/drivers/:path*', '/trip/:path*', '/vehicle/:path*', '/forms/:path*', '/users/:path*'],
 };

@@ -19,6 +19,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { downloadFile } from "@/hooks/use-fle-donwload";
 
 export default function DriverDetailPage() {
   const { driverId } = useParams();
@@ -107,6 +108,10 @@ export default function DriverDetailPage() {
             <div>
               <h3 className="font-semibold">Employment Status</h3>
               <p>{driver.employment_status}</p>
+            </div>
+            <div>
+              <h3>Employee Document</h3>
+              <Button onClick={() => downloadFile(driver.document_url)}>View Document</Button>
             </div>
           </CardContent>
         </Card>
