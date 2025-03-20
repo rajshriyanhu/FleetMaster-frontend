@@ -36,7 +36,8 @@ const AllCustomerTable = ({
     filteredCustomers = filteredCustomers.filter(
       (customer: Customer) =>
         customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        customer.email.toLowerCase().includes(searchQuery.toLowerCase())
+        customer.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        customer.phone_number.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }
 

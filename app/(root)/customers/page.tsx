@@ -87,7 +87,7 @@ const CustomerPage = () => {
           </label>
           <Input
             id="search-drivers"
-            placeholder="Search by name, email..."
+            placeholder="Search by name, email, phone..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full md:w-[300px]"

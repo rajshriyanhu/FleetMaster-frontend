@@ -153,31 +153,13 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
   const onSubmit = async (data: DriverFormType) => {
     console.log(data);
     if (!document) {
+      toast({
+        title: "Document is required",
+        description: "Please upload a document to continue",
+        variant: "destructive",
+      });
       return;
     }
-    const uploadpromise = [];
-    const uniqueId = uuidv4();
-    const fileName = `${uniqueId}_${document.name}`;
-    uploadpromise.push(
-      uploadFile(fileName, document).then((res) => {
-        form.setValue("document_url", fileName);
-        data.document_url = fileName;
-      })
-      .catch((err) => {
-        toast({
-          title: "Failed to upload document",
-          variant: "destructive",
-          description: "Please try again later.",
-        });
-        return;
-      })
-    );
-
-    await Promise.all(uploadpromise);
-
-    toast({
-      title: "All documents uploaded Successfully!",
-    });
 
     if (driver) {
       updateDriver({ id: driver.id, values: data })
@@ -195,6 +177,25 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
         });
       return;
     }
+
+    try {
+      const uniqueId = uuidv4();
+      const fileName = `${uniqueId}_${document!.name}`;
+      await uploadFile(fileName, document!);
+      form.setValue("document_url", fileName);
+      data.document_url = fileName;
+
+      toast({
+        title: "Document uploaded successfully!",
+      });
+    } catch (error) {
+      toast({
+        title: "Uh Oh! Something went wrong",
+        description: "Failed to create driver",
+        variant: "destructive",
+      });
+    }
+
     await createDriver(data)
       .then(() => {
         toast({
@@ -579,6 +580,9 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
+                        captionLayout="dropdown-buttons"
+                        fromYear={1980}
+                        toYear={2100}
                         selected={field.value}
                         onSelect={(date) => {
                           field.onChange(date);

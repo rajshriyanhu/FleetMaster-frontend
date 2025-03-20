@@ -191,9 +191,12 @@ const VehicleForm = ({
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setErrorMessage("");
-
       if (!vehicle && (!rc || !puc || !insurance || !fitness)) {
-        setErrorMessage("Please upload all required documents");
+        toast({
+          title: "Missing documents",
+          description: "Please upload all required documents",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -1171,7 +1174,7 @@ const VehicleForm = ({
                 name="last_service_kms"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Last service KMs</FormLabel>
+                    <FormLabel>Last service KMs (optional)</FormLabel>
                     <FormControl>
                       <Input
                         placeholder=""
