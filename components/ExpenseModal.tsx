@@ -40,6 +40,7 @@ import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { v4 as uuidv4 } from "uuid";
 import { useFileUpload } from "@/hooks/use-file-upload";
+import { cn } from "@/lib/utils";
 
 const expenseFormSchema = () => {
   return z.object({
@@ -101,7 +102,7 @@ const ExpenseModal = ({
     const fileName = `${uniqueId}_${document.name}`;
     uploadFile(fileName, document)
       .then((res) => {
-          form.setValue("file_url", res.filename);
+        form.setValue("file_url", res.filename);
       })
       .catch((err) => {
         toast({
@@ -209,7 +210,7 @@ const ExpenseModal = ({
   console.log(document);
 
   return (
-    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen} modal={false}>
       <DialogContent className="w-full">
         <DialogHeader className="flex flex-col gap-3">
           <DialogTitle className="text-light-100 text-center">
@@ -327,9 +328,10 @@ const ExpenseModal = ({
                     <Input
                       className="shad-input"
                       {...field}
-                      value={field.value !== undefined && field.value !== null
-                        ? `₹${new Intl.NumberFormat("en-IN").format(field.value)}`
-                        : ""
+                      value={
+                        field.value !== undefined && field.value !== null
+                          ? `₹${new Intl.NumberFormat("en-IN").format(field.value)}`
+                          : ""
                       }
                       onChange={(e) => {
                         let value = e.target.value.replace(/₹|,/g, ""); // Remove ₹ and commas
@@ -350,46 +352,51 @@ const ExpenseModal = ({
               control={form.control}
               name="date"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <div className="shad-form-item">
-                    <FormLabel className="shad-form-label">
-                      Date of expense
-                    </FormLabel>
-                    <div className="w-full border rounded-md">
-                      <Popover
-                        open={calendarOpen1}
-                        onOpenChange={setCalendarOpen1}
-                      >
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button variant="ghost">
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick date of expense</span>
-                              )}
-                              <CalendarIcon className="ml-auto size-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            captionLayout="dropdown-buttons"
-                            fromYear={1980}
-                            toYear={2100}
-                            mode="single"
-                            selected={field.value}
-                            onSelect={(date) => {
-                              field.onChange(date);
-                              setCalendarOpen1(false);
-                            }}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                  </div>
-                  <FormMessage className="shad-form-message" />
+                <FormItem>
+                  <FormLabel>Date of Expense</FormLabel>
+                  <Popover open={calendarOpen1} onOpenChange={setCalendarOpen1}>
+                    <PopoverTrigger className="w-full" asChild>
+                      <FormControl>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP")
+                          ) : (
+                            <span>Pick expense date</span>
+                          )}
+                          <CalendarIcon className="ml-auto size-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-auto p-0"
+                      align="start"
+                      side="bottom"
+                      sideOffset={4}
+                      style={{ zIndex: 99999 }}
+                      forceMount
+                    >
+                      <Calendar
+                        captionLayout="dropdown-buttons"
+                        fromYear={1980}
+                        toYear={2100}
+                        mode="single"
+                        selected={field.value}
+                        onSelect={(date) => {
+                          field.onChange(date);
+                          setCalendarOpen1(false);
+                        }}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
                 </FormItem>
               )}
             />

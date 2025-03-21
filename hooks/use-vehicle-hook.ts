@@ -1,6 +1,7 @@
 import { vehicleFormType } from "@/components/VehicleForm";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import { useDebounce } from "./use-debounce";
 
 axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL;
 axios.defaults.withCredentials = true;
@@ -19,11 +20,12 @@ export const useCreateVehicle = () => {
   });
 };
 
-export function useGetAllVehicles() {
+export function useGetAllVehicles(page:number, limit:number,searchQuery:string) {
+  const debouncedSearchQuery = useDebounce(searchQuery, 600); 
   return useQuery({
-    queryKey: ["allVehicles"],
+    queryKey: ["allVehicles", limit, page, debouncedSearchQuery],
     queryFn: async () => {
-      const response = await axios.get("/vehicle/");
+      const response = await axios.get(`/vehicle/?page=${page}&limit=${limit}&search=${debouncedSearchQuery}`);
       return response.data;
     },
   });

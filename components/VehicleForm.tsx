@@ -47,7 +47,7 @@ const vehicleFormSchema = () => {
       city: z.string().min(2).max(50).regex(alphabetOnlyRegex, {
         message: "City must contain only alphabets.",
       }),
-      registration_no: z.string(),
+      registration_no: z.string().min(2).max(50),
       make: z.string().regex(alphabetOnlyRegex, {
         message: "Make must contain only alphabets.",
       }),
@@ -77,12 +77,15 @@ const vehicleFormSchema = () => {
       fitness_url: z.string().optional(),
       last_battery_change: z.date().optional(),
       last_service: z.date().optional(),
-      last_service_kms: z.number(),
+      last_service_kms: z.number().optional(),
       next_service_due: z.date(),
       next_service_due_kms: z.number(),
       gps_renewal_due: z.date().optional(),
     })
-    .refine((data) => data.next_service_due_kms > data.last_service_kms, {
+    .refine((data) => {
+      if (!data.last_service_kms || !data.next_service_due_kms) return true;
+      return data.next_service_due_kms > data.last_service_kms;
+    }, {
       message: "Next service due kms must be greater than last service kms.",
       path: ["next_service_due_kms"],
     });

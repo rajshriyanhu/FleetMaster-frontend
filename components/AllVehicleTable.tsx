@@ -15,16 +15,20 @@ import { convertTimestampToDate } from "@/utils";
 import { Vehicle } from "@/dto";
 import { useRouter } from "next/navigation";
 
-const AllVehicleTable = () => {
+const AllVehicleTable = ({
+  vehicles,
+  isLoading,
+} : {
+  vehicles: Vehicle[] | null;
+  isLoading: boolean;
+}) => {
   const router = useRouter();
-  const { data: vehicleList, isLoading, isError, error } = useGetAllVehicles();
-  console.log(vehicleList);
 
   if (isLoading) return <>Loading</>
 
-  if (isError) {
+  if (!vehicles) {
     return <>
-      <h2>{error.message}!</h2>
+      <h2>Vehicles not fetched!</h2>
     </>
   }
 
@@ -35,7 +39,7 @@ const AllVehicleTable = () => {
         <TableRow>
           <TableHead className="font-semibold text-black">No.</TableHead>
           <TableHead className="font-semibold text-black">Model</TableHead>
-          <TableHead className="font-semibold text-black">Variant</TableHead>
+          <TableHead className="font-semibold text-black">Registration No.</TableHead>
           <TableHead className="font-semibold text-black">Region</TableHead>
           <TableHead className="font-semibold text-black">State</TableHead>
           <TableHead className="font-semibold text-black">Next Service</TableHead>
@@ -46,12 +50,12 @@ const AllVehicleTable = () => {
         </TableRow>
       </TableHeader>
       <TableBody >
-        {vehicleList.vehicles.map((vehicle: Vehicle, index: number) => {
+        {vehicles.map((vehicle: Vehicle, index: number) => {
           return (
             <TableRow className="cursor-pointer h-16" key={vehicle.id} onClick={() => router.push(`/vehicle/${vehicle.id}`)}>
               <TableCell>{index + 1}</TableCell>
               <TableCell>{vehicle.model}</TableCell>
-              <TableCell>{vehicle.variant}</TableCell>
+              <TableCell>{vehicle.registration_no}</TableCell>
               <TableCell>{vehicle.region}</TableCell>
               <TableCell>{vehicle.state}</TableCell>
               <TableCell>{convertTimestampToDate(vehicle.next_service_due)}</TableCell>
