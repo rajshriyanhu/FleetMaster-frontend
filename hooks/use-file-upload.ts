@@ -10,7 +10,7 @@ export function useFileUpload() {
       method: "PUT",
       body: file, // Send raw file data
       headers: {
-        "Content-Type": "application/octet-stream", // Match Python headers
+        "Content-Type": "application/pdf", // Match Python headers
       },
     });
 

@@ -84,7 +84,7 @@ const TripForm = ({ trip }: { trip?: Trip }) => {
     "name"
   );
 
-  const { data: allVehicle, isError: vehicleError } = useGetAllVehicles();
+  const { data: allVehicle, isError: vehicleError } = useGetAllVehicles(1, 100, '');
   const [errorMessage, setErrorMessage] = useState("");
   const { mutateAsync: createTrip, isPending: isLoading } = useCreateTrip();
   const { mutateAsync: updateTrip, isPending: isUpdatingLoading } =
@@ -272,7 +272,7 @@ const TripForm = ({ trip }: { trip?: Trip }) => {
           </h3>
           {/* Warning Messages */}
           <div className="mb-4">
-            {(!allVehicle?.vehicles || allVehicle.vehicles.length === 0) && (
+            {(!allVehicle?.data || allVehicle.data.length === 0) && (
               <p className="text-yellow-600 bg-yellow-50 p-2 rounded mb-2">
                 ⚠️ No vehicles available. You need at least one vehicle to
                 create a trip.
@@ -344,7 +344,7 @@ const TripForm = ({ trip }: { trip?: Trip }) => {
                             {/* Ensure TypeScript understands the type of model */}
                             {Array.from(
                               new Set(
-                                allVehicle.vehicles.map((v: Vehicle) => v.model)
+                                allVehicle.data.map((v: Vehicle) => v.model)
                               )
                             ).map((model) => (
                               <SelectItem
@@ -378,7 +378,7 @@ const TripForm = ({ trip }: { trip?: Trip }) => {
                             <SelectValue placeholder="Select a vehicle" />
                           </SelectTrigger>
                           <SelectContent>
-                            {allVehicle.vehicles
+                            {allVehicle.data
                               .filter(
                                 (v: Vehicle) =>
                                   v.model === form.watch("vehicle_model")
