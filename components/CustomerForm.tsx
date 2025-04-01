@@ -51,30 +51,33 @@ const CustomerForm = ({ user }: { user?: Customer }) => {
   const { mutateAsync: createCustomer, isPending } = useCreateCustomer();
   const { mutateAsync: updateCustomer, isPending: isUpdatingCustomer } =
     useUpdateCustomer();
+
   const form = useForm<CustomerFormType>({
     resolver: zodResolver(customerFormSchema()),
     defaultValues: {
-      prefix: "",
-      name: "",
-      email: "",
-      phone_number: "",
-      street: "",
-      city: "",
-      state: "",
-      postal_code: undefined,
+      prefix: user?.prefix || "",
+      name: user?.name || "",
+      email: user?.email || "",
+      phone_number: user?.phone_number || "",
+      street: user?.address?.street || "",
+      city: user?.address?.city || "",
+      state: user?.address?.state || "",
+      postal_code: user?.address?.postal_code || undefined,
     },
   });
 
   useEffect(() => {
     if (user) {
+      form.setValue("prefix", user.prefix);
       form.setValue("name", user.name);
       form.setValue("email", user.email);
       form.setValue("phone_number", user.phone_number);
       form.setValue("street", user.address.street);
       form.setValue("city", user.address.city);
       form.setValue("state", user.address.state);
+      form.setValue("postal_code", user.address.postal_code);
     }
-  }, [user, form]);
+  }, [user]);
 
   const onSubmit = (data: CustomerFormType) => {
     if (user) {
@@ -141,7 +144,10 @@ const CustomerForm = ({ user }: { user?: Customer }) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full px-8">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-8 w-full px-8"
+      >
         {/* Personal Information Section */}
         <div className="bg-white p-6 rounded-lg border shadow-sm">
           <h3 className="text-lg font-semibold mb-4">Personal Information</h3>
@@ -153,7 +159,7 @@ const CustomerForm = ({ user }: { user?: Customer }) => {
                 render={({ field }) => (
                   <FormItem className="w-32">
                     <FormLabel>Title</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
@@ -261,7 +267,7 @@ const CustomerForm = ({ user }: { user?: Customer }) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>State</FormLabel>
-                    <Select onValueChange={field.onChange}>
+                    <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select state" />
                       </SelectTrigger>

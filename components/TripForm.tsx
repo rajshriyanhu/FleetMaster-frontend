@@ -117,6 +117,7 @@ const TripForm = ({ trip }: { trip?: Trip }) => {
       permit: undefined,
       maintainance: undefined,
       profit: undefined,
+      trip_type: trip ? trip.trip_type : ''
     },
   });
 

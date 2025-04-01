@@ -1,12 +1,12 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useGetDriverById } from "@/hooks/use-driver-hook";
+import { useDeleteDriver, useGetDriverById } from "@/hooks/use-driver-hook";
 import { format } from "date-fns";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Mail, Phone } from "lucide-react";
+import { Mail, Phone, TrashIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Driver } from "@/dto";
 import { useHeader } from "@/hooks/use-header";
@@ -20,12 +20,16 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { downloadFile } from "@/hooks/use-fle-donwload";
+import { Pencil1Icon } from "@radix-ui/react-icons";
+import { useToast } from "@/hooks/use-toast";
 
 export default function DriverDetailPage() {
   const { driverId } = useParams();
-  const router = useRouter();
   const { data, isLoading } = useGetDriverById(driverId as string);
+  const {mutateAsync : deleteDriver} = useDeleteDriver();
   const { setTitle } = useHeader();
+  const router = useRouter();
+  const {toast} = useToast();
 
   useEffect(() => {
     setTitle(
@@ -53,10 +57,45 @@ export default function DriverDetailPage() {
 
   const driver: Driver = data.driver;
 
-  console.log(data, driver);
+  const handleDeleteDriver = () => {
+    // TODO: Implement delete driver logic
+    deleteDriver(driver.id).then(() => {
+      toast({
+        title: "Driver deleted successfully",
+        description: "The driver has been deleted.",
+      });
+    })
+    .catch(() => {
+     toast({
+       variant: "destructive",
+       title: "Error deleting driver",
+       description: "Something went wrong while deleting the driver.",
+     });
+    })
+    router.push(`/drivers`);
+  };
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-end gap-3">
+        <Button
+            variant="outline"
+            className="flex items-center gap-2"
+            onClick={() => router.push(`/drivers/${driver.id}/edit`)
+          }
+          >
+            <Pencil1Icon className="h-4 w-4" /> Edit
+          </Button>
+
+          <Button
+            variant="destructive"
+            className="flex items-center gap-2"
+            onClick={handleDeleteDriver}
+          >
+            <TrashIcon className="h-4 w-4" />
+            Delete
+          </Button>
+        </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Personal Information */}
         <Card>

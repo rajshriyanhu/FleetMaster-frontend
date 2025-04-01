@@ -35,15 +35,15 @@ export function useGetAllCustomers(page:number, limit:number,searchQuery:string,
   });
 }
 
-// export function useGetExpenseById(id: string) {
-//   return useQuery({
-//     queryKey: ["expense", id],
-//     queryFn: async () => {
-//       const response = await axios.get(`/expense/${id}`);
-//       return response.data;
-//     },
-//   });
-// }
+export function useGetCustomerById(id: string) {
+  return useQuery({
+    queryKey: ["customer", id],
+    queryFn: async () => {
+      const response = await axios.get(`/customer/${id}`);
+      return response.data;
+    },
+  });
+}
 
 export function useUpdateCustomer() {
   const queryClient = useQueryClient();

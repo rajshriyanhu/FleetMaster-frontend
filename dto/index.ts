@@ -89,7 +89,7 @@ export type Address = {
   city: string;
   state: string;
   country: string;
-  postal_code: string;
+  postal_code: number;
   created_at: string;
   updated_at: string;
   deleted: boolean;
@@ -112,9 +112,11 @@ export type Driver = {
   id: string;
   name: string;
   email: string;
-  phone_number: number;
-  alt_phone_number: number;
-  emg_phone_number: number;
+  phone_number: string;
+  alt_phone_number: string;
+  emg_phone_number: string;
+  emg_name: string;
+  emg_relation: string;
   insurance_valid_upto: string;
   joining_date: string;
   exit_date: string;

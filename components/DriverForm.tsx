@@ -94,19 +94,23 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
   const form = useForm<DriverFormType>({
     resolver: zodResolver(driverFormSchema()),
     defaultValues: {
-      name: "",
-      email: "",
-      phone_number: "",
-      alt_phone_number: "",
-      emg_name: "",
-      emg_relation: "",
-      emg_phone_number: "",
-      dl_number: "",
-      experience: undefined,
-      street: "",
-      city: "",
-      postal_code: undefined,
-      working_city: "",
+      name: driver ? driver.name : "",
+      email: driver ? driver.email : "",
+      phone_number: driver ? driver.phone_number : "",
+      alt_phone_number: driver ? driver.alt_phone_number : "",
+      emg_name: driver ? driver.emg_name : "",
+      emg_relation: driver ? driver.emg_relation : "",
+      emg_phone_number: driver ? driver.emg_phone_number : "",
+      dl_number: driver ? driver.dl_number : "",
+      experience: driver ? driver.experience : undefined,
+      street: driver ? driver.address.street : "",
+      city: driver ? driver.address.city : "",
+      state : driver ? driver.address.state : '',
+      employment_status : driver ? driver.employment_status : '',
+      postal_code: driver ? driver.address.postal_code : undefined,
+      working_city: driver ? driver.working_city : "",
+      working_region : driver ? driver.working_region : '',
+      working_state : driver ? driver.working_state : '',
     },
   });
 
@@ -120,6 +124,13 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
       form.setValue("street", driver.address.street);
       form.setValue("city", driver.address.city);
       form.setValue("state", driver.address.state);
+      form.setValue("experience", driver.experience);
+      form.setValue("expertise", driver.expertise);
+      form.setValue("state", driver.address.state);
+      form.setValue("employment_status", driver.employment_status);
+      form.setValue("insurance_valid_upto", new Date(driver.insurance_valid_upto));
+      form.setValue("joining_date", new Date(driver.joining_date));
+      if(driver.exit_date)form.setValue("exit_date", new Date(driver.exit_date));
     }
   }, [driver, form]);
 
@@ -152,15 +163,6 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
 
   const onSubmit = async (data: DriverFormType) => {
     console.log(data);
-    if (!document) {
-      toast({
-        title: "Document is required",
-        description: "Please upload a document to continue",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (driver) {
       updateDriver({ id: driver.id, values: data })
         .then(() => {
@@ -175,6 +177,16 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
             variant: "destructive",
           });
         });
+        router.push('/drivers');
+      return;
+    }
+    
+    if (!document) {
+      toast({
+        title: "Document is required",
+        description: "Please upload a document to continue",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -350,7 +362,7 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
                   <FormControl>
                     <Select
                       onValueChange={field.onChange}
-                      // defaultValue={vehicle ? vehicle.region : field.value}
+                      value={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -379,7 +391,7 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
                   <FormControl>
                     <Select
                       onValueChange={field.onChange}
-                      // defaultValue={vehicle ? vehicle.state : field.value}
+                      defaultValue={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -757,7 +769,7 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
                   <FormControl>
                     <Select
                       onValueChange={field.onChange}
-                      // defaultValue={vehicle ? vehicle.region : field.value}
+                      value={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -820,7 +832,7 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>State</FormLabel>
-                  <Select onValueChange={field.onChange}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select state" />

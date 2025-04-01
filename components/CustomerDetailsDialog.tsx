@@ -1,10 +1,17 @@
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Customer } from "@/dto";
+import { Button } from "./ui/button";
+import { Pencil1Icon } from "@radix-ui/react-icons";
+import { TrashIcon } from "lucide-react";
+import { useDeleteCustomer } from "@/hooks/use-customer-hook";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 interface CustomerDetailsDialogProps {
   customer: Customer | null;
@@ -13,7 +20,34 @@ interface CustomerDetailsDialogProps {
 }
 
 const CustomerDetailsDialog = ({ customer, isOpen, onClose }: CustomerDetailsDialogProps) => {
+  const { mutateAsync : deleteCustomer } = useDeleteCustomer();
+  const {toast} = useToast();
+  const router = useRouter();
+
   if (!customer) return null;
+
+  const handleEditCustomer = () => {
+    // TODO: Implement edit customer logic
+    router.push(`/customers/${customer.id}/edit`);
+    onClose();
+  };
+
+  const handleDeleteCustomer = () => {
+    deleteCustomer(customer.id).then(() => {
+      toast({
+        title: "Customer deleted successfully",
+        description: "The customer has been deleted from the system.",
+      });
+      onClose();
+    })
+    .catch(() => {
+      toast({
+        variant: "destructive",
+        title: "Customer deletion failed",
+        description: "An error occurred while deleting the customer.",
+      });
+    })
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -57,6 +91,26 @@ const CustomerDetailsDialog = ({ customer, isOpen, onClose }: CustomerDetailsDia
             </div>
           </div>
         </div>
+        <DialogFooter>
+        <div className="flex items-center gap-3">
+        <Button
+            variant="outline"
+            className="flex items-center gap-2"
+            onClick={handleEditCustomer}
+          >
+            <Pencil1Icon className="h-4 w-4" /> Edit
+          </Button>
+
+          <Button
+            variant="destructive"
+            className="flex items-center gap-2"
+            onClick={handleDeleteCustomer}
+          >
+            <TrashIcon className="h-4 w-4" />
+            Delete
+          </Button>
+        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
