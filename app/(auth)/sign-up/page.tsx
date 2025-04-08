@@ -1,5 +1,12 @@
-import SignUpForm from "@/components/SignUpForm";
+"use client";
 
-const SignUp = () => <SignUpForm />
+import SignUpForm from "@/components/SignUpForm";
+import { Suspense } from "react";
+
+const SignUp = () => (
+  <Suspense>
+    <SignUpForm />
+  </Suspense>
+);
 
 export default SignUp;

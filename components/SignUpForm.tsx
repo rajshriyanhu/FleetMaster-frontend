@@ -14,7 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSignUp } from "@/hooks/use-auth-hook";
@@ -37,9 +37,9 @@ const SignUpForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const params = useSearchParams();
-  const inviteId = params.get("inviteId");
-  const email = params.get("email");
-  const name = params.get("name");
+  const inviteId = params.get("inviteId") || '';
+  const email = params.get("email") || '';
+  const name = params.get("name") || '';
 
   const form = useForm<z.infer<typeof signUpFormSchema>>({
     resolver: zodResolver(signUpFormSchema),
