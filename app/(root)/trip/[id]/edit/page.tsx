@@ -14,6 +14,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { SkeletonCard } from "@/components/skeleton-card";
 
 export default function TripEditPage() {
   const params = useParams();
@@ -38,7 +39,14 @@ export default function TripEditPage() {
     );
   }, []);
 
-  if (isLoading) return <>Loading</>;
+  if (isLoading)
+    return (
+      <div className="grid grid-cols-1 gap-4">
+        <SkeletonCard />
+        <SkeletonCard />
+        <SkeletonCard />
+      </div>
+    );
 
   if (isError) return <>Something wnet wrong</>;
 

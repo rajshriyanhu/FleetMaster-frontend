@@ -14,6 +14,8 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useEffect } from "react";
+import { SkeletonCard } from "@/components/skeleton-card";
+import { Error } from "@/components/error";
 
 export default function EditPage() {
     const params = useParams();
@@ -36,9 +38,14 @@ export default function EditPage() {
   }, []);
 
     
-    if (isLoading) return <>Loading</>;
+    if (isLoading) return <div className="grid grid-cols-1 gap-8 mx-4">
+      <SkeletonCard />
+      <SkeletonCard />
+      <SkeletonCard />
+      <SkeletonCard />
+    </div>
     
-    if (isError) return <>Something wnet wrong</>;
+    if (isError) return <Error />
     
     const vehicle: Vehicle = data.vehicle;
     return (

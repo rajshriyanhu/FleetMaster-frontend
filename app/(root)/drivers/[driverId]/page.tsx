@@ -22,6 +22,7 @@ import {
 import { downloadFile } from "@/hooks/use-fle-donwload";
 import { Pencil1Icon } from "@radix-ui/react-icons";
 import { useToast } from "@/hooks/use-toast";
+import { SkeletonCard } from "@/components/skeleton-card";
 
 export default function DriverDetailPage() {
   const { driverId } = useParams();
@@ -48,7 +49,12 @@ export default function DriverDetailPage() {
   }, []);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div className="grid grid-cols-2 gap-4 pt-8">
+      <SkeletonCard />
+      <SkeletonCard />
+      <SkeletonCard />
+      <SkeletonCard />
+    </div>;
   }
 
   if (!data) {

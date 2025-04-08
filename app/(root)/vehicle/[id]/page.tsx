@@ -19,6 +19,8 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { SkeletonCard } from "@/components/skeleton-card";
+import { Error } from "@/components/error";
 
 const VehicleDetailsPage = () => {
   const params = useParams();
@@ -28,7 +30,6 @@ const VehicleDetailsPage = () => {
   const { mutateAsync: deleteVehicleEntry } = useDeleteVehicle(
     params.id as string
   );
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
   const { setTitle } = useHeader();
   useEffect(() => {
@@ -47,9 +48,11 @@ const VehicleDetailsPage = () => {
     );
   }, []);
 
-  if (isLoading) return <>Loading</>;
+  if (isLoading) return <div>
+    <SkeletonCard />
+  </div>
 
-  if (isError) return <>Something wnet wrong</>;
+  if (isError) return <Error />
 
   const vehicle: Vehicle = data.vehicle;
 

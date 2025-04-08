@@ -73,7 +73,6 @@ const CustomerPage = () => {
           onClick={() => {
             router.push("/customers/create");
           }}
-          className="rounded-full"
         >
           <PlusCircledIcon className="text-xl font-semibold" />
           New Customer

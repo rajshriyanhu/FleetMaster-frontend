@@ -10,6 +10,7 @@ import {
 } from "./ui/table";
 import { Customer } from "@/dto";
 import CustomerDetailsDialog from "./CustomerDetailsDialog";
+import { SkeletonTable } from "./skeleton-table";
 
 const AllCustomerTable = ({
   customers,
@@ -26,7 +27,7 @@ const AllCustomerTable = ({
     null
   );
 
-  if (isLoading || !customers) return <>Loading</>;
+  if (isLoading || !customers) return <SkeletonTable />
 
 
   let filteredCustomers = customers;

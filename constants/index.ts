@@ -1,4 +1,4 @@
-import { Bike, Car, FormInputIcon, Logs, LucideIcon, SquareUser, User, Users } from "lucide-react";
+import { Bike, Car, FormInputIcon, Logs, LucideIcon, Send, SquareUser, User, Users } from "lucide-react";
 
 type NavItem = {
   name: string;
@@ -41,6 +41,11 @@ export const navItems: NavItem[] = [
     name: "All Users",
     icon: User,
     url: "/users",
+  },
+  {
+    name: "All Invites",
+    icon: Send,
+    url: "/invites",
   },
 ];
 

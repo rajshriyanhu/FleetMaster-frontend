@@ -27,6 +27,8 @@ import { useGetVehicleById } from "@/hooks/use-vehicle-hook";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "./ui/button";
 import { downloadFile } from "@/hooks/use-fle-donwload";
+import { SkeletonTable } from "./skeleton-table";
+import { Error } from "./error";
 
 const AllExpenseTable = () => {
   const params = useParams();
@@ -45,8 +47,12 @@ const AllExpenseTable = () => {
   const {mutateAsync: deleteExpense} = useDeleteExpense();
   const [openEditModal, setOpenEditModal] = useState(false);
 
-  if (isLoading || !expensesList || isVehicleLoading || !vehicle || isError) {
-    return <>Loading</>;
+  if (isLoading || isVehicleLoading ) {
+    return <SkeletonTable />
+  }
+
+  if(!vehicle || isError){
+    return <Error />
   }
 
   const handleDeleteExpense = (expenseId: string) => {

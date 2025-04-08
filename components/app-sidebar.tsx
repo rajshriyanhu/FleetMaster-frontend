@@ -16,22 +16,16 @@ import {
 import { navItems } from "@/constants";
 import Link from "next/link";
 import Image from "next/image";
-import UserContext from "@/context/user-context";
 import { usePathname } from "next/navigation";
+import { getStoredUser } from "@/utils";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const context = React.useContext(UserContext);
   const pathname = usePathname();
-  if (!context) {
-    throw new Error("UserContext is not available!");
-  }
-
-  const { user } = context;
-
+  const user = getStoredUser();
   const getActiveClass = (url: string) => {
     const cleanPathname = pathname.split("?")[0];
     const cleanUrl = url.split("?")[0];
-    if(cleanUrl === '/')return cleanUrl === cleanPathname;
+    if (cleanUrl === "/") return cleanUrl === cleanPathname;
     return cleanPathname.includes(cleanUrl);
   };
 
@@ -62,19 +56,31 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu>
-            {navItems.map((item) => (
-              <SidebarMenuItem key={item.name} >
-                <SidebarMenuButton asChild className="py-6" isActive={getActiveClass(item.url)}>
-                  <Link
-                    href={item.url}
-                    className="font-medium flex items-center gap-3 text-base"
+            {navItems.map((item) => {
+              if (user && user.role !== "ADMIN" && item.name === "All Users") {
+                return null;
+              }
+              if (user && user.role !== "ADMIN" && item.name === "All Invites") {
+                return null;
+              }
+              return (
+                <SidebarMenuItem key={item.name}>
+                  <SidebarMenuButton
+                    asChild
+                    className="py-6"
+                    isActive={getActiveClass(item.url)}
                   >
-                    {item.icon && <item.icon className="h-5 w-5" />}
-                    {item.name}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
+                    <Link
+                      href={item.url}
+                      className="font-medium flex items-center gap-3 text-base"
+                    >
+                      {item.icon && <item.icon className="h-5 w-5" />}
+                      {item.name}
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            })}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>

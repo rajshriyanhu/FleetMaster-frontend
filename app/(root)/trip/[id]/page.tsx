@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { useHeader } from "@/hooks/use-header";
 import { Button } from "@/components/ui/button";
+import { SkeletonCard } from "@/components/skeleton-card";
 
 const TripDetailsPage = () => {
   const params = useParams();
@@ -41,7 +42,11 @@ const TripDetailsPage = () => {
     );
   }, []);
 
-  if (isLoading) return <>Loading</>;
+  if (isLoading) return <div className="grid grid-cols-1 gap-4">
+    <SkeletonCard />
+    <SkeletonCard />
+    <SkeletonCard />
+  </div>
 
   if (isError) return <>Something wnet wrong</>;
 

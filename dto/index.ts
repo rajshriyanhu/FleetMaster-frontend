@@ -2,15 +2,19 @@ export type User = {
   id: string;
   email: string;
   name: string;
-  role: "USER" | "ADMIN";
+  role: "VIEWER" | "ADMIN" | "EDITOR";
   permissions: {
     vehicle: {
       read: boolean;
       write: boolean;
+      update: boolean;
+      delete: boolean;
     };
     trip: {
       read: boolean;
       write: boolean;
+      update: boolean;
+      delete: boolean;
     };
   };
   createdAt: string;
@@ -201,4 +205,13 @@ export type DashboardVehicle = {
   variant: string;
   make: string;
   dueTasks: string[];
+}
+
+export type Invite = {
+  name: string;
+  email: string;
+  id: string;
+  role: "VIEWER" | "ADMIN" | "EDITOR";
+  created_at: string;
+  updated_at: string;
 }

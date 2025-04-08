@@ -73,7 +73,6 @@ const DriverPage = () => {
             onClick={() => {
               router.push("/drivers/create");
             }}
-            className="rounded-full"
           >
             <PlusCircledIcon className="text-xl font-semibold" />
             New Driver

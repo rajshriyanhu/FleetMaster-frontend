@@ -323,7 +323,7 @@ const CustomerForm = ({ user }: { user?: Customer }) => {
           >
             {isPending || isUpdatingCustomer ? (
               <div className="flex items-center gap-2">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                <div className="h-4 w-4 animate-spin border-2 border-current border-t-transparent" />
                 {user ? "Saving..." : "Creating..."}
               </div>
             ) : user ? (

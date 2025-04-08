@@ -11,6 +11,7 @@ import {
 } from "./ui/table";
 import { Driver } from "@/dto";
 import { convertTimestampToDate } from "@/utils";
+import { SkeletonTable } from "./skeleton-table";
 
 const AllDriverTable = ({
   drivers,
@@ -21,7 +22,7 @@ const AllDriverTable = ({
 }) => {
   const router = useRouter();
 
-  if (isLoading || !drivers) return <>Loading</>;
+  if (isLoading || !drivers) return <SkeletonTable />
 
   return (
     <Table>

@@ -1,4 +1,6 @@
-import { TripStatus } from "@/dto";
+'use client';
+
+import { User } from "@/dto";
 
 export function convertTimestampToDate(timestamp: string): string {
     const date = new Date(timestamp);
@@ -8,10 +10,19 @@ export function convertTimestampToDate(timestamp: string): string {
     return `${day}/${month}/${year}`;
   }
 
-export const getTripStatus = (status : TripStatus) => {
-  if(status === 'NOT_STARTED')return 'Not Started';
-  if(status === 'IN_PROGRESS')return 'In progress';
-  if(status === 'CANCELLED')return 'Cancelled';
-  if(status === 'EXPIRED')return 'Expired';
-  if(status === 'COMPLETED')return 'Completed';
-}
+export const getStoredUser = () => {
+  if(window === undefined)return null;
+  const stored = localStorage.getItem("user");
+  return stored ? JSON.parse(stored) : null;
+};
+
+export const setStoredUser = (user: User) => {
+  if(window === undefined)return null;
+
+    localStorage.setItem("user", JSON.stringify(user));
+};
+
+export const clearStoredUser = () => {
+  if(window === undefined)return;
+    localStorage.removeItem("user");
+};

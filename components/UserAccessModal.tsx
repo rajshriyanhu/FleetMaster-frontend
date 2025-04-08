@@ -8,12 +8,6 @@ import {
 import { User } from "@/dto";
 import AccessForm from "./AccessForm";
 
-const  DATAPOINTS = [
-    'Vehicle',
-    'Trip',
-    'Driver',
-]
-
 export const UserAccessModal = ({
     isModalOpen,
     setIsModalOpen,

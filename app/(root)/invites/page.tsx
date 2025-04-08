@@ -1,8 +1,6 @@
 "use client";
 
 import AllUsersTable from "@/components/AllUsersTable";
-import { Button } from "@/components/ui/button";
-import { PlusCircledIcon } from "@radix-ui/react-icons";
 import React, { useEffect } from "react";
 import {
   Breadcrumb,
@@ -11,9 +9,9 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import { useHeader } from "@/hooks/use-header";
-import { UserInviteModal } from "@/components/user-invite-modal";
+import AllUserInviteTable from "@/components/AllUserInviteTable";
 
-const UsersPage = () => {
+const InvitePage = () => {
   const { setTitle } = useHeader();
 
   useEffect(() => {
@@ -21,24 +19,24 @@ const UsersPage = () => {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbPage>All Users</BreadcrumbPage>
+            <BreadcrumbPage>All Invites</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
     );
   }, []);
+  
   return (
     <div className="w-full flex-col space-y-8">
       <div className="flex justify-between">
         <p className="h2 text-brand text-2xl font-semibold">
-          Manage users' permission
+          View and manage your user invites
         </p>
-        <UserInviteModal />
       </div>
 
-      <AllUsersTable />
+      <AllUserInviteTable />
     </div>
   );
 };
 
-export default UsersPage;
+export default InvitePage;

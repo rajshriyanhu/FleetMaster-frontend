@@ -10,24 +10,61 @@ type LoginSchema = {
   password: string;
 }
 
+type SignUpSchema = {
+  email: string;
+  password: string;
+  name: string;
+  code: number;
+  inviteId: string; 
+}
+
 type AccessSchema = {
   userId: string,
-  permissions: {
-    vehicle: {
-      read: boolean;
-      write: boolean;
-    },
-    trip: {
-      read: boolean;
-      write: boolean;
-    }
-  }
+  // permissions: {
+  //   vehicle: {
+  //     read: boolean;
+  //     write: boolean;
+  //     update: boolean;
+  //     delete: boolean;
+  //   },
+  //   trip: {
+  //     read: boolean;
+  //     write: boolean;
+  //     update: boolean;
+  //     delete: boolean;
+  //   },
+  //   driver: {
+  //     read: boolean;
+  //     write: boolean;
+  //     update: boolean;
+  //     delete: boolean;
+  //   },
+  //   customer: {
+  //     read: boolean;
+  //     write: boolean;
+  //     update: boolean;
+  //     delete: boolean;
+  //   },
+  //   expense: {
+  //     read: boolean;
+  //     write: boolean;
+  //     update: boolean;
+  //     delete: boolean;
+  //   },
+  //   user : {
+  //     read: boolean;
+  //     write: boolean;
+  //     update: boolean;
+  //     delete: boolean;
+  //   }
+  // }
+  role: "ADMIN" | "EDITOR" | "VIEWER"
 }
 
 export const useSignUp = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (values: SignUpFormSchema) => {
+    mutationFn: async (values: SignUpSchema) => {
       const response = await axios.post("/auth/signup", values);
       return response.data;
     },
@@ -65,6 +102,8 @@ export function useGetLoggedInUser() {
       const response = await axios.get(`/auth/loggedInUser`);
       return response.data;
     },
+    staleTime: 1000 * 60 * 5, // 15 minutes
+    refetchInterval: 1000 * 60 * 5,
   });
 }
 

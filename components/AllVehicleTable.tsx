@@ -1,6 +1,5 @@
 "use client";
 
-import { useGetAllVehicles } from "@/hooks/use-vehicle-hook";
 import React from "react";
 import {
   Table,
@@ -14,6 +13,8 @@ import {
 import { convertTimestampToDate } from "@/utils";
 import { Vehicle } from "@/dto";
 import { useRouter } from "next/navigation";
+import { SkeletonTable } from "./skeleton-table";
+import { Error } from "./error";
 
 const AllVehicleTable = ({
   vehicles,
@@ -24,12 +25,10 @@ const AllVehicleTable = ({
 }) => {
   const router = useRouter();
 
-  if (isLoading) return <>Loading</>
+  if (isLoading) return <SkeletonTable />
 
   if (!vehicles) {
-    return <>
-      <h2>Vehicles not fetched!</h2>
-    </>
+    return <Error />
   }
 
   return (

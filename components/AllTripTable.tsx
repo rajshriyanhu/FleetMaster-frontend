@@ -10,10 +10,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { convertTimestampToDate, getTripStatus } from "@/utils";
+import { convertTimestampToDate } from "@/utils";
 import { Trip } from "@/dto";
 import { useRouter } from "next/navigation";
-import { useGetAllTrips } from "@/hooks/use-trip-hook";
+import { SkeletonTable } from "./skeleton-table";
 
 const AllTripTable = ({
   trips,
@@ -24,7 +24,7 @@ const AllTripTable = ({
 }) => {
   const router = useRouter();
 
-  if (isLoading) return <>Loading</>;
+  if (isLoading) return <SkeletonTable />
 
   if (!trips) return <>Error</>;
 
@@ -57,7 +57,7 @@ const AllTripTable = ({
               <TableCell>{trip.start_location}</TableCell>
               <TableCell>{trip.end_location}</TableCell>
               <TableCell>{trip.profit}</TableCell>
-              <TableCell>{trip.customer_name}</TableCell>
+              <TableCell>{trip.customer.name}</TableCell>
               <TableCell>{trip.driver.name}</TableCell>
               <TableCell>{convertTimestampToDate(trip.start_date)}</TableCell>
               <TableCell>{convertTimestampToDate(trip.end_date)}</TableCell>

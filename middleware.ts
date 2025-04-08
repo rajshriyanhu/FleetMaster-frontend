@@ -19,13 +19,16 @@ export async function middleware(request: NextRequest) {
     try {
         const secret = new TextEncoder().encode(process.env.NEXT_PUBLIC_JWT_SECRET);
         const verify = await jwtVerify(token?.value || '', secret);
-        console.log(verify)
+        console.log("Verify token : ",verify)
         return NextResponse.next();
     } catch (error) {
         // Token is invalid or expired
+        console.log("error : ", error)
         if (!isAuthPage) {
-            return NextResponse.redirect(new URL('/sign-in', request.url));
-        }
+            const response = NextResponse.redirect(new URL('/sign-in', request.url));
+            response.cookies.set('accessToken', '', { maxAge: 0 });
+            return response;
+          }
         return NextResponse.next();
     }
 }

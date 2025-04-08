@@ -960,7 +960,7 @@ const TripForm = ({ trip }: { trip?: Trip }) => {
           >
             {isLoading || isUpdatingLoading ? (
               <div className="flex items-center gap-2">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                <div className="h-4 w-4 animate-spin border-2 border-current border-t-transparent" />
                 {trip ? "Saving..." : "Creating..."}
               </div>
             ) : trip ? (

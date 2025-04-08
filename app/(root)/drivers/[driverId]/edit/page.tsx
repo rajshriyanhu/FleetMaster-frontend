@@ -1,6 +1,7 @@
 'use client';
 
 import DriverForm from "@/components/DriverForm";
+import { SkeletonCard } from "@/components/skeleton-card";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Driver } from "@/dto";
 import { useGetDriverById } from "@/hooks/use-driver-hook";
@@ -33,7 +34,11 @@ export default function EditDriverPage() {
       );
     }, []);
   
-    if (isLoading) return <>Loading</>;
+    if (isLoading) return <div className="space-y-4 mx-2">
+      <SkeletonCard />
+      <SkeletonCard />
+      <SkeletonCard />
+      </div>;
   
     if (isError) return <>Something went wrong</>;
   

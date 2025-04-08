@@ -56,7 +56,6 @@ const VehiclePage = () => {
           onClick={() => {
             router.push('/vehicle/upload')
           }}
-          className="rounded-full"
         >
           <PlusCircledIcon className="text-xl font-semibold" />
           New Vehicle

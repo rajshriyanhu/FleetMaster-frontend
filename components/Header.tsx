@@ -1,35 +1,29 @@
 "use client";
 
-import React, { useContext } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { Bell, LogIn, LogOut } from "lucide-react";
+import { LogIn, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
-import UserContext from "@/context/user-context";
 import { useLogout } from "@/hooks/use-auth-hook";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "./ui/sidebar";
 import { useHeader } from "@/hooks/use-header";
+import { clearStoredUser, getStoredUser } from "@/utils";
 
 const Header = () => {
   const router = useRouter();
   const { toast } = useToast();
-  const { mutateAsync: logout } = useLogout();
+  const { mutateAsync: logoutFn } = useLogout();
   const { title } = useHeader();
-  const context = useContext(UserContext);
-  if (!context) {
-    throw new Error("UserContext is not available!");
-  }
-
-  const { user, setUser } = context;
-
+  const user = getStoredUser();
   const handleLogout = () => {
-    logout()
+    logoutFn()
       .then((res) => {
-        setUser(undefined);
         toast({
           title: "Logout successful",
         });
+        clearStoredUser();
         router.push("/sign-in");
       })
       .catch((err) => {
@@ -48,8 +42,7 @@ const Header = () => {
         {title}
       </div>
       <div className="header-wrapper">
-        <Bell />
-        {user ? (
+        { user ? (
           <Button onClick={handleLogout}>
             Sign Out <LogOut size={24} />
           </Button>

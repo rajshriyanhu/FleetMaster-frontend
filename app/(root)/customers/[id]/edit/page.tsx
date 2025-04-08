@@ -1,6 +1,7 @@
 'use client';
 
 import CustomerForm from "@/components/CustomerForm";
+import { SkeletonCard } from "@/components/skeleton-card";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Customer } from "@/dto";
 import { useGetCustomerById } from "@/hooks/use-customer-hook";
@@ -27,7 +28,10 @@ export default function EditCustomerPage() {
       );
     }, []);
   
-    if (isLoading) return <>Loading</>;
+    if (isLoading) return <div className="py-8 space-y-4">
+      <SkeletonCard />
+      <SkeletonCard />
+    </div>
   
     if (isError) return <>Something went wrong</>;
   

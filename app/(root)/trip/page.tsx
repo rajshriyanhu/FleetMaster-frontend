@@ -74,7 +74,6 @@ const TripPage = () => {
           onClick={() => {
             router.push("/trip/create");
           }}
-          className="rounded-full"
         >
           <PlusCircledIcon className="text-xl font-semibold" />
           New Trip

@@ -10,54 +10,68 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { convertTimestampToDate, getTripStatus } from "@/utils";
-import { Trip, User } from "@/dto";
-import { useRouter } from "next/navigation";
-import { useGetAllTrips } from "@/hooks/use-trip-hook";
+import { convertTimestampToDate } from "@/utils";
+import { User } from "@/dto";
 import { useGetAllUsers } from "@/hooks/use-auth-hook";
 import { UserAccessModal } from "./UserAccessModal";
+import { SkeletonTable } from "./skeleton-table";
+import { Error } from "./error";
+import { Button } from "./ui/button";
 
 const AllUsersTable = () => {
-  const router = useRouter();
-  const { data: userList, isLoading } = useGetAllUsers();
+  const { data: userList, isLoading, isError } = useGetAllUsers();
   const [selectedUser, setSelectedUser] = useState<User | undefined>(undefined);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  console.log(userList);
 
-  if (isLoading || !userList) return <>Loading</>
+  if (isLoading) return <SkeletonTable />;
+
+  if (isError) return <Error />;
 
   return (
     <>
-      <Table>
+            <Table>
         <TableCaption>A list of all your users</TableCaption>
         <TableHeader className="bg-white py-4">
           <TableRow>
-            <TableHead className="font-semibold text-black">No.</TableHead>
-            <TableHead className="font-semibold text-black">Name</TableHead>
-            <TableHead className="font-semibold text-black">Email</TableHead>
-            <TableHead className="font-semibold text-black">Role</TableHead>
-            <TableHead className="font-semibold text-black">Created At</TableHead>
+            <TableHead className="w-[80px] font-semibold text-black">No.</TableHead>
+            <TableHead className="w-[200px] font-semibold text-black">Name</TableHead>
+            <TableHead className="w-[250px] font-semibold text-black">Email</TableHead>
+            <TableHead className="w-[150px] font-semibold text-black">Role</TableHead>
+            <TableHead className="w-[200px] font-semibold text-black">Joined On</TableHead>
+            <TableHead className="w-[100px] font-semibold text-black"></TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody >
+        <TableBody>
           {userList.map((user: User, index: number) => {
             return (
-              <TableRow className="h-16 cursor-pointer" key={user.id} onClick={() => {
-                setSelectedUser(user);
-                setIsModalOpen(true);
-              }}>
-                <TableCell>{index + 1}</TableCell>
-                <TableCell>{user.name}</TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>{user.role}</TableCell>
-                <TableCell>{convertTimestampToDate(user.createdAt)}</TableCell>
+              <TableRow className="h-16" key={user.id}>
+                <TableCell className="w-[80px]">{index + 1}</TableCell>
+                <TableCell className="w-[200px]">{user.name}</TableCell>
+                <TableCell className="w-[250px]">{user.email}</TableCell>
+                <TableCell className="w-[150px]">{user.role}</TableCell>
+                <TableCell className="w-[200px]">{convertTimestampToDate(user.createdAt)}</TableCell>
+                <TableCell className="w-[100px] text-right">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedUser(user);
+                      setIsModalOpen(true);
+                    }}
+                  >
+                    Edit Access
+                  </Button>
+                </TableCell>
               </TableRow>
             );
           })}
         </TableBody>
-
       </Table>
-      <UserAccessModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} user={selectedUser} />
+      <UserAccessModal
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        user={selectedUser}
+      />
     </>
   );
 };
