@@ -15,6 +15,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { SkeletonCard } from "@/components/skeleton-card";
+import { Error } from "@/components/error";
 
 export default function TripEditPage() {
   const params = useParams();
@@ -48,7 +49,7 @@ export default function TripEditPage() {
       </div>
     );
 
-  if (isError) return <>Something wnet wrong</>;
+  if (isError) return <Error />
 
   const trip: Trip = data.trip;
   return (

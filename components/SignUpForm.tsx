@@ -19,7 +19,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSignUp } from "@/hooks/use-auth-hook";
 import { useToast } from "@/hooks/use-toast";
-import UserContext from "@/context/user-context";
 import { setStoredUser } from "@/utils";
 
 const signUpFormSchema = z.object({

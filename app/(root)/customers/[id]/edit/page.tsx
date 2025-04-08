@@ -1,6 +1,7 @@
 'use client';
 
 import CustomerForm from "@/components/CustomerForm";
+import { Error } from "@/components/error";
 import { SkeletonCard } from "@/components/skeleton-card";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Customer } from "@/dto";
@@ -33,7 +34,7 @@ export default function EditCustomerPage() {
       <SkeletonCard />
     </div>
   
-    if (isError) return <>Something went wrong</>;
+    if (isError) return <Error />
   
     const customer: Customer = data.customer;
 

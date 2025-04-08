@@ -15,6 +15,8 @@ import {
 import { DashboardVehicle, Trip } from "@/dto";
 import DashboardTasks from "@/components/DashboardTasks";
 import DashboardTrips from "@/components/DashboardTrips";
+import { SkeletonCard } from "@/components/skeleton-card";
+import { Error } from "@/components/error";
 
 const Dashboard = () => {
   const { setTitle } = useHeader();
@@ -42,14 +44,20 @@ const Dashboard = () => {
   }, []);
 
   if (tripLoading || taskLoading) {
-    return <>Loading...</>;
+    return (
+      <div className="grid grid-cols-1 gap-4">
+        <SkeletonCard />
+        <SkeletonCard />
+      </div>
+    );
+  }
+
+  if (taskError || tripError) {
+    return <Error />;
   }
 
   const trips = tripsData?.trips as Trip[];
   const tasks = tasksData?.vehicles as DashboardVehicle[];
-
-  console.log("trips", trips);
-  console.log("tasks", tasks);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

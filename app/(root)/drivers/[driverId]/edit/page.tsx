@@ -1,6 +1,7 @@
 'use client';
 
 import DriverForm from "@/components/DriverForm";
+import { Error } from "@/components/error";
 import { SkeletonCard } from "@/components/skeleton-card";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Driver } from "@/dto";
@@ -40,7 +41,7 @@ export default function EditDriverPage() {
       <SkeletonCard />
       </div>;
   
-    if (isError) return <>Something went wrong</>;
+    if (isError) return <Error />
   
     const driver: Driver = data.driver;
 

@@ -15,13 +15,14 @@ import { Invite } from "@/dto";
 import { useGetAllInvites } from "@/hooks/use-invite-user-hook";
 import { Button } from "./ui/button";
 import { SkeletonTable } from "./skeleton-table";
+import { Error } from "./error";
 
 const AllUserInviteTable = () => {
   const { data: inviteList, isLoading, isError } = useGetAllInvites();
 
   if (isLoading) return <SkeletonTable />;
 
-  if(isError)return <>Error</>;
+  if(isError)return <Error />
 
   return (
     <>

@@ -19,6 +19,7 @@ import {
 import { useHeader } from "@/hooks/use-header";
 import { Button } from "@/components/ui/button";
 import { SkeletonCard } from "@/components/skeleton-card";
+import { Error } from "@/components/error";
 
 const TripDetailsPage = () => {
   const params = useParams();
@@ -48,7 +49,7 @@ const TripDetailsPage = () => {
     <SkeletonCard />
   </div>
 
-  if (isError) return <>Something wnet wrong</>;
+  if (isError) return <Error />
 
   const trip: Trip = data.trip;
 
