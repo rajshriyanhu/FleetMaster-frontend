@@ -130,3 +130,21 @@ export const useUpdateAccess = () => {
     }
   });
 };
+
+export const useSendCode = () => {
+  return useMutation({
+    mutationFn: async (email: string) => {
+      const response = await axios.post("/auth/sendCode", {email});
+      return response.data;
+    },
+  });
+}
+
+export const useUpdatePassword = () => {
+  return useMutation({
+    mutationFn: async (password: string) => {
+      const response = await axios.post("/auth/updatePassword", {password});
+      return response.data;
+    },
+  });
+}

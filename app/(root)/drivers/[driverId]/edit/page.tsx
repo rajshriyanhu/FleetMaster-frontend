@@ -45,9 +45,6 @@ export default function EditDriverPage() {
   
     const driver: Driver = data.driver;
 
-    console.log(data.driver)
-
-    console.log(driver);
     return (
       <div className="flex flex-col items-center justify-center space-y-8">
         <h2 className="h2 text-brand text-2xl font-semibold">
