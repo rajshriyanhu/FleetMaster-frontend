@@ -27,6 +27,8 @@ export default function ProfilePage() {
     );
   }, []);
 
+  console.log(user);
+
   if (isLoading) {
     return <ProfileSkeleton />;
   }

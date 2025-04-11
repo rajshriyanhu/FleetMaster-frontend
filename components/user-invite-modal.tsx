@@ -42,7 +42,7 @@ export type InviteFormValues = z.infer<typeof formSchema>;
 
 export function UserInviteModal() {
   const [isOpen, setIsOpen] = useState(false);
-  const { mutateAsync: inviteUser } = useInviteUser();
+  const { mutateAsync: inviteUser, isPending } = useInviteUser();
   const { toast } = useToast();
 
   const form = useForm<InviteFormValues>({
@@ -156,6 +156,7 @@ export function UserInviteModal() {
               <Button
                 type="button"
                 variant="outline"
+                disabled={isPending}
                 onClick={() => setIsOpen(false)}
               >
                 Cancel

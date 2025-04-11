@@ -20,6 +20,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useSignUp } from "@/hooks/use-auth-hook";
 import { useToast } from "@/hooks/use-toast";
 import { setStoredUser } from "@/utils";
+import { Eye, EyeOff } from "lucide-react";
 
 const signUpFormSchema = z.object({
   email: z.string().email(),
@@ -36,10 +37,11 @@ const SignUpForm = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const params = useSearchParams();
-  const inviteId = params.get("inviteId") || '';
-  const email = params.get("email") || '';
-  const name = params.get("name") || '';
+  const inviteId = params.get("inviteId") || "";
+  const email = params.get("email") || "";
+  const name = params.get("name") || "";
 
   const form = useForm<z.infer<typeof signUpFormSchema>>({
     resolver: zodResolver(signUpFormSchema),
@@ -152,12 +154,27 @@ const SignUpForm = () => {
                     Password
                   </FormLabel>
                   <FormControl>
+                  <div className="relative">
                     <Input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="Create a password"
                       className="h-11 bg-gray-50/50"
                       {...field}
                     />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-gray-400" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-gray-400" />
+                      )}
+                    </Button>
+                    </div>
                   </FormControl>
                   <FormMessage className="text-xs" />
                 </FormItem>
