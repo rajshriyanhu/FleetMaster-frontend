@@ -20,14 +20,17 @@ import { useHeader } from "@/hooks/use-header";
 import { Button } from "@/components/ui/button";
 import { SkeletonCard } from "@/components/skeleton-card";
 import { Error } from "@/components/error";
+import { useUserRole } from "@/hooks/use-get-role";
+import { hasPermission } from "@/utils/permissions";
 
 const TripDetailsPage = () => {
   const params = useParams();
-  const {toast} = useToast();
+  const { toast } = useToast();
   const router = useRouter();
   const { data, isLoading, isError } = useGetTripById(params.id as string);
-  const {mutateAsync: deleteTrip} = useDeleteTrip(params.id as string);
+  const { mutateAsync: deleteTrip } = useDeleteTrip(params.id as string);
   const { setTitle } = useHeader();
+  const role = useUserRole();
 
   useEffect(() => {
     setTitle(
@@ -43,72 +46,80 @@ const TripDetailsPage = () => {
     );
   }, []);
 
-  if (isLoading) return <div className="grid grid-cols-1 gap-4">
-    <SkeletonCard />
-    <SkeletonCard />
-    <SkeletonCard />
-  </div>
+  if (isLoading)
+    return (
+      <div className="grid grid-cols-1 gap-4">
+        <SkeletonCard />
+        <SkeletonCard />
+        <SkeletonCard />
+      </div>
+    );
 
-  if (isError) return <Error />
+  if (isError) return <Error />;
 
   const trip: Trip = data.trip;
 
   const handleDeleteTrip = async () => {
     await deleteTrip()
-    .then(() => {
-      router.push('/trip')  
-      toast({
-            title: 'Vehicle entry deleted successfully!',
-        })
-    })
-    .catch((err) => {
+      .then(() => {
+        router.push("/trip");
         toast({
-            title: 'Uh Oh! Something went wrong',
-            description: `Failed to delete vehicle entry, ${err.message}`,
-            variant: 'destructive'
-        })
-    })
-  }
+          title: "Vehicle entry deleted successfully!",
+        });
+      })
+      .catch((err) => {
+        toast({
+          title: "Uh Oh! Something went wrong",
+          description: `Failed to delete vehicle entry, ${err.message}`,
+          variant: "destructive",
+        });
+      });
+  };
 
   const handleEditTrip = () => {
-    router.push(`/trip/${trip.id}/edit`)
-  }
+    router.push(`/trip/${trip.id}/edit`);
+  };
 
-  console.log(trip)
+  console.log(trip);
 
   return (
     <div className="flex-col justify-center space-y-8">
       <div className="flex w-full justify-between">
         <p className="text-brand text-3xl font-bold">Trip Details</p>
         <div className="flex items-center gap-3">
-        <Button
-            variant="outline"
-            className="flex items-center gap-2"
-            onClick={handleEditTrip}
-          >
-            <Pencil1Icon className="h-4 w-4" /> Edit
-          </Button>
+          {role && hasPermission("trips", "edit", role) && (
+            <Button
+              variant="outline"
+              className="flex items-center gap-2"
+              onClick={handleEditTrip}
+            >
+              <Pencil1Icon className="h-4 w-4" /> Edit
+            </Button>
+          )}
 
-          <Button
-            variant="destructive"
-            className="flex items-center gap-2"
-            onClick={handleDeleteTrip}
-          >
-            <TrashIcon className="h-4 w-4" />
-            Delete
-          </Button>
+          {role && hasPermission("trips", "delete", role) && (
+            <Button
+              variant="destructive"
+              className="flex items-center gap-2"
+              onClick={handleDeleteTrip}
+            >
+              <TrashIcon className="h-4 w-4" />
+              Delete
+            </Button>
+          )}
         </div>
-        
       </div>
       <div className="flex w-2/3 mx-auto flex-col justify-center space-y-3 rounded-xl bg-white p-8">
-      <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <div>Trip Type</div>
           <div className="text-lg font-semibold">{trip.trip_type}</div>
         </div>
         <Separator />
         <div className="grid grid-cols-2 gap-4">
           <div>Vehicle</div>
-          <div className="text-lg font-semibold">{trip.vehicle.registration_no}</div>
+          <div className="text-lg font-semibold">
+            {trip.vehicle.registration_no}
+          </div>
         </div>
         <Separator />
         <div className="grid grid-cols-2 gap-4">
@@ -123,7 +134,9 @@ const TripDetailsPage = () => {
         <Separator />
         <div className="grid grid-cols-2 gap-4">
           <div>Customer&apos;s Phone number</div>
-          <div className="text-lg font-semibold">{trip.customer.phone_number}</div>
+          <div className="text-lg font-semibold">
+            {trip.customer.phone_number}
+          </div>
         </div>
         <Separator />
         <div className="grid grid-cols-2 gap-4">
@@ -159,11 +172,13 @@ const TripDetailsPage = () => {
           <div>Locations visited</div>
           <div className="text-lg font-semibold">{trip.location_visited}</div>
         </div>
-        <Separator /><div className="grid grid-cols-2 gap-4">
+        <Separator />
+        <div className="grid grid-cols-2 gap-4">
           <div>Start KMs</div>
           <div className="text-lg font-semibold">{trip.start_km}</div>
         </div>
-        <Separator /><div className="grid grid-cols-2 gap-4">
+        <Separator />
+        <div className="grid grid-cols-2 gap-4">
           <div>End KMs</div>
           <div className="text-lg font-semibold">{trip.end_km}</div>
         </div>
@@ -208,7 +223,6 @@ const TripDetailsPage = () => {
           <div className="text-lg font-semibold">{trip.profit}</div>
         </div>
         <Separator />
-       
       </div>
     </div>
   );

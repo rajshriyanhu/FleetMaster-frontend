@@ -25,7 +25,7 @@ import {
 } from "./ui/select";
 
 const formSchema = z.object({
-  role: z.enum(["ADMIN", "EDITOR", "VIEWER"]),
+  role: z.enum(["ADMIN", "EDITOR", "VIEWER", "CREATOR"]),
 });
 
 const AccessForm = ({
@@ -85,6 +85,7 @@ const AccessForm = ({
                   <SelectItem value="ADMIN">Admin</SelectItem>
                   <SelectItem value="VIEWER">Viewer</SelectItem>
                   <SelectItem value="EDITOR">Editor</SelectItem>
+                  <SelectItem value="CREATOR">Creator</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />

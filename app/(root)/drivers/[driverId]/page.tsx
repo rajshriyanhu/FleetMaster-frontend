@@ -23,6 +23,8 @@ import { downloadFile } from "@/hooks/use-fle-donwload";
 import { Pencil1Icon } from "@radix-ui/react-icons";
 import { useToast } from "@/hooks/use-toast";
 import { SkeletonCard } from "@/components/skeleton-card";
+import { useUserRole } from "@/hooks/use-get-role";
+import { hasPermission } from "@/utils/permissions";
 
 export default function DriverDetailPage() {
   const { driverId } = useParams();
@@ -31,6 +33,7 @@ export default function DriverDetailPage() {
   const { setTitle } = useHeader();
   const router = useRouter();
   const {toast} = useToast();
+  const role = useUserRole();
 
   useEffect(() => {
     setTitle(
@@ -84,23 +87,23 @@ export default function DriverDetailPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-end gap-3">
-        <Button
+        {role && hasPermission('drivers', 'edit', role) && <Button
             variant="outline"
             className="flex items-center gap-2"
             onClick={() => router.push(`/drivers/${driver.id}/edit`)
           }
           >
             <Pencil1Icon className="h-4 w-4" /> Edit
-          </Button>
+          </Button>}
 
-          <Button
+          {role && hasPermission('drivers', 'delete', role) && <Button
             variant="destructive"
             className="flex items-center gap-2"
             onClick={handleDeleteDriver}
           >
             <TrashIcon className="h-4 w-4" />
             Delete
-          </Button>
+          </Button>}
         </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Personal Information */}

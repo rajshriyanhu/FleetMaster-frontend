@@ -1,4 +1,3 @@
-import { SignUpFormSchema } from "@/components/SignUpForm";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 
@@ -58,7 +57,7 @@ type AccessSchema = {
   //     delete: boolean;
   //   }
   // }
-  role: "ADMIN" | "EDITOR" | "VIEWER"
+  role: "ADMIN" | "EDITOR" | "VIEWER" | "CREATOR"
 }
 
 export const useSignUp = () => {

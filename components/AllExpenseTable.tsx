@@ -29,10 +29,12 @@ import { Button } from "./ui/button";
 import { downloadFile } from "@/hooks/use-fle-donwload";
 import { SkeletonTable } from "./skeleton-table";
 import { Error } from "./error";
+import { useUserRole } from "@/hooks/use-get-role";
+import { hasPermission } from "@/utils/permissions";
 
 const AllExpenseTable = () => {
   const params = useParams();
-  const {toast} = useToast()
+  const { toast } = useToast();
   const { data: expensesList, isLoading } = useGetAllExpenses(
     params.id as string
   );
@@ -44,33 +46,34 @@ const AllExpenseTable = () => {
     isLoading: isVehicleLoading,
     isError,
   } = useGetVehicleById(params.id as string);
-  const {mutateAsync: deleteExpense} = useDeleteExpense();
+  const { mutateAsync: deleteExpense } = useDeleteExpense();
+  const role = useUserRole();
   const [openEditModal, setOpenEditModal] = useState(false);
 
-  if (isLoading || isVehicleLoading ) {
-    return <SkeletonTable />
+  if (isLoading || isVehicleLoading) {
+    return <SkeletonTable />;
   }
 
-  if(!vehicle || isError){
-    return <Error />
+  if (!vehicle || isError) {
+    return <Error />;
   }
 
   const handleDeleteExpense = (expenseId: string) => {
-    console.log('delete')
+    console.log("delete");
     deleteExpense(expenseId)
-    .then(() => {
+      .then(() => {
         toast({
-            title: 'Expense deleted successfully'
-        })
-    })
-    .catch((err) => {
+          title: "Expense deleted successfully",
+        });
+      })
+      .catch((err) => {
         toast({
-            title: "Uh Oh! Something went wrong",
-            description: `Failed to upload vehicle data, ${err.message}`,
-            variant: "destructive",
-          });
-    })
-  }
+          title: "Uh Oh! Something went wrong",
+          description: `Failed to upload vehicle data, ${err.message}`,
+          variant: "destructive",
+        });
+      });
+  };
 
   return (
     <>
@@ -90,7 +93,7 @@ const AllExpenseTable = () => {
             </TableHead>
             <TableHead className="font-semibold text-black">Amount</TableHead>
             <TableHead className="font-semibold text-black">Document</TableHead>
-            
+
             <TableHead className="font-semibold text-black">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -105,26 +108,38 @@ const AllExpenseTable = () => {
                 </TableCell>
                 <TableCell>{convertTimestampToDate(expense.date)}</TableCell>
                 <TableCell>{expense.amount}</TableCell>
-                <TableCell><Button onClick={() => downloadFile(expense.file_url)}>View</Button></TableCell>
+                <TableCell>
+                  <Button onClick={() => downloadFile(expense.file_url)}>
+                    View
+                  </Button>
+                </TableCell>
                 <TableCell onClick={() => {}} className=" cursor-pointer">
                   <DropdownMenu>
                     <DropdownMenuTrigger className="flex items-center gap-2 px-4 py-2">
                       <Ellipsis />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent alignOffset={20}>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setCurrentExpense(expense);
-                          setOpenEditModal(true);
-                        }}
-                      >
-                        <Pencil1Icon className="size-8" />
-                        Edit Expense
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => {handleDeleteExpense(expense.id)}}>
-                        <Trash2Icon className="size-8" />
-                        Delete Expense
-                      </DropdownMenuItem>
+                      {role && hasPermission("expense", "edit", role) && (
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setCurrentExpense(expense);
+                            setOpenEditModal(true);
+                          }}
+                        >
+                          <Pencil1Icon className="size-8" />
+                          Edit Expense
+                        </DropdownMenuItem>
+                      )}
+                      {role && hasPermission("expense", "delete", role) && (
+                        <DropdownMenuItem
+                          onClick={() => {
+                            handleDeleteExpense(expense.id);
+                          }}
+                        >
+                          <Trash2Icon className="size-8" />
+                          Delete Expense
+                        </DropdownMenuItem>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

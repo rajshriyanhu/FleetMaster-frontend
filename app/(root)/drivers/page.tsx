@@ -29,6 +29,8 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import { useHeader } from "@/hooks/use-header";
+import { useUserRole } from "@/hooks/use-get-role";
+import { hasPermission } from "@/utils/permissions";
 
 const DriverPage = () => {
   const router = useRouter();
@@ -43,6 +45,7 @@ const DriverPage = () => {
     sortBy
   );
   const { setTitle } = useHeader();
+  const role = useUserRole();
 
   useEffect(() => {
     setTitle(
@@ -69,14 +72,16 @@ const DriverPage = () => {
           <p className="h2 text-brand text-2xl font-semibold">
             View and manage your drivers
           </p>
-          <Button
-            onClick={() => {
-              router.push("/drivers/create");
-            }}
-          >
-            <PlusCircledIcon className="text-xl font-semibold" />
-            New Driver
-          </Button>
+          {role && hasPermission("drivers", "create", role) && (
+            <Button
+              onClick={() => {
+                router.push("/drivers/create");
+              }}
+            >
+              <PlusCircledIcon className="text-xl font-semibold" />
+              New Driver
+            </Button>
+          )}
         </div>
 
         <div className="flex flex-col space-y-4 md:flex-row md:items-end md:space-x-4 md:space-y-0">

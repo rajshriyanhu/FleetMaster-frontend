@@ -35,7 +35,7 @@ import { useInviteUser } from "@/hooks/use-invite-user-hook";
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email address"),
-  role: z.enum(["ADMIN", "VIEWER", "EDITOR"]),
+  role: z.enum(["ADMIN", "VIEWER", "EDITOR", "CREATOR"]),
 });
 
 export type InviteFormValues = z.infer<typeof formSchema>;
@@ -146,6 +146,7 @@ export function UserInviteModal() {
                       <SelectItem value="ADMIN">Admin</SelectItem>
                       <SelectItem value="VIEWER">Viewer</SelectItem>
                       <SelectItem value="EDITOR">Editor</SelectItem>
+                      <SelectItem value="CREATOR">Creator</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

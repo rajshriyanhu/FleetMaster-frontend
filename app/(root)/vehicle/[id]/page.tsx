@@ -21,6 +21,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { SkeletonCard } from "@/components/skeleton-card";
 import { Error } from "@/components/error";
+import { useUserRole } from "@/hooks/use-get-role";
+import { hasPermission } from "@/utils/permissions";
 
 const VehicleDetailsPage = () => {
   const params = useParams();
@@ -32,6 +34,8 @@ const VehicleDetailsPage = () => {
   );
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
   const { setTitle } = useHeader();
+  const role = useUserRole();
+
   useEffect(() => {
     setTitle(
       <Breadcrumb>
@@ -48,11 +52,14 @@ const VehicleDetailsPage = () => {
     );
   }, []);
 
-  if (isLoading) return <div>
-    <SkeletonCard />
-  </div>
+  if (isLoading)
+    return (
+      <div>
+        <SkeletonCard />
+      </div>
+    );
 
-  if (isError) return <Error />
+  if (isError) return <Error />;
 
   const vehicle: Vehicle = data.vehicle;
 
@@ -77,41 +84,49 @@ const VehicleDetailsPage = () => {
       <div className="flex w-full justify-between ">
         <p className="text-brand text-xl font-bold">{vehicle.model}</p>
         <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            className="flex items-center gap-2"
-            onClick={() => setIsExpenseModalOpen(true)}
-          >
-            <PlusCircleIcon className="h-4 w-4" />
-            Add Expense
-          </Button>
+          {role && hasPermission("expense", "create", role) && (
+            <Button
+              variant="outline"
+              className="flex items-center gap-2"
+              onClick={() => setIsExpenseModalOpen(true)}
+            >
+              <PlusCircleIcon className="h-4 w-4" />
+              Add Expense
+            </Button>
+          )}
 
-          <Button
-            variant="outline"
-            className="flex items-center gap-2"
-            onClick={() => router.push(`/vehicle/${vehicle.id}/expense`)}
-          >
-            <EyeIcon className="h-4 w-4" />
-            View Expenses
-          </Button>
+          {role && hasPermission("expense", "view", role) && (
+            <Button
+              variant="outline"
+              className="flex items-center gap-2"
+              onClick={() => router.push(`/vehicle/${vehicle.id}/expense`)}
+            >
+              <EyeIcon className="h-4 w-4" />
+              View Expenses
+            </Button>
+          )}
 
-          <Button
-            variant="outline"
-            className="flex items-center gap-2"
-            onClick={() => router.push(`/vehicle/${vehicle.id}/edit`)}
-          >
-            <Pencil1Icon className="h-4 w-4" />
-            Edit
-          </Button>
+          {role && hasPermission("vehicle", "edit", role) && (
+            <Button
+              variant="outline"
+              className="flex items-center gap-2"
+              onClick={() => router.push(`/vehicle/${vehicle.id}/edit`)}
+            >
+              <Pencil1Icon className="h-4 w-4" />
+              Edit
+            </Button>
+          )}
 
-          <Button
-            variant="destructive"
-            className="flex items-center gap-2"
-            onClick={handleDeleteVehicle}
-          >
-            <TrashIcon className="h-4 w-4" />
-            Delete
-          </Button>
+          {role && hasPermission("vehicle", "delete", role) && (
+            <Button
+              variant="destructive"
+              className="flex items-center gap-2"
+              onClick={handleDeleteVehicle}
+            >
+              <TrashIcon className="h-4 w-4" />
+              Delete
+            </Button>
+          )}
         </div>
       </div>
       <div className="flex w-full justify-center">

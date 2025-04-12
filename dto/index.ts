@@ -2,7 +2,7 @@ export type User = {
   id: string;
   email: string;
   name: string;
-  role: "VIEWER" | "ADMIN" | "EDITOR";
+  role: "VIEWER" | "ADMIN" | "EDITOR" | "CREATOR";
   permissions: {
     vehicle: {
       read: boolean;

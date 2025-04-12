@@ -29,6 +29,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useUserRole } from "@/hooks/use-get-role";
+import { hasPermission } from "@/utils/permissions";
 
 const TripPage = () => {
   const router = useRouter();
@@ -43,6 +45,7 @@ const TripPage = () => {
     searchQuery,
     sortBy
   );
+  const role = useUserRole();
 
   useEffect(() => {
     setTitle(
@@ -70,14 +73,14 @@ const TripPage = () => {
         <p className="h2 text-brand text-2xl font-semibold">
           View and Manage your trips
         </p>
-        <Button
+        {role && hasPermission('trips', 'create', role) && <Button
           onClick={() => {
             router.push("/trip/create");
           }}
         >
           <PlusCircledIcon className="text-xl font-semibold" />
           New Trip
-        </Button>
+        </Button>}
       </div>
 
       <div className="flex flex-col space-y-4 md:flex-row md:items-end md:space-x-4 md:space-y-0">

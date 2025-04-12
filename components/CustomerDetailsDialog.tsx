@@ -12,6 +12,8 @@ import { TrashIcon } from "lucide-react";
 import { useDeleteCustomer } from "@/hooks/use-customer-hook";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { useUserRole } from "@/hooks/use-get-role";
+import { hasPermission } from "@/utils/permissions";
 
 interface CustomerDetailsDialogProps {
   customer: Customer | null;
@@ -19,10 +21,15 @@ interface CustomerDetailsDialogProps {
   onClose: () => void;
 }
 
-const CustomerDetailsDialog = ({ customer, isOpen, onClose }: CustomerDetailsDialogProps) => {
-  const { mutateAsync : deleteCustomer } = useDeleteCustomer();
-  const {toast} = useToast();
+const CustomerDetailsDialog = ({
+  customer,
+  isOpen,
+  onClose,
+}: CustomerDetailsDialogProps) => {
+  const { mutateAsync: deleteCustomer } = useDeleteCustomer();
+  const { toast } = useToast();
   const router = useRouter();
+  const role = useUserRole();
 
   if (!customer) return null;
 
@@ -33,21 +40,22 @@ const CustomerDetailsDialog = ({ customer, isOpen, onClose }: CustomerDetailsDia
   };
 
   const handleDeleteCustomer = () => {
-    deleteCustomer(customer.id).then(() => {
-      toast({
-        title: "Customer deleted successfully",
-        description: "The customer has been deleted from the system.",
+    deleteCustomer(customer.id)
+      .then(() => {
+        toast({
+          title: "Customer deleted successfully",
+          description: "The customer has been deleted from the system.",
+        });
+        onClose();
+      })
+      .catch(() => {
+        toast({
+          variant: "destructive",
+          title: "Customer deletion failed",
+          description: "An error occurred while deleting the customer.",
+        });
       });
-      onClose();
-    })
-    .catch(() => {
-      toast({
-        variant: "destructive",
-        title: "Customer deletion failed",
-        description: "An error occurred while deleting the customer.",
-      });
-    })
-  }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -92,24 +100,28 @@ const CustomerDetailsDialog = ({ customer, isOpen, onClose }: CustomerDetailsDia
           </div>
         </div>
         <DialogFooter>
-        <div className="flex items-center gap-3">
-        <Button
-            variant="outline"
-            className="flex items-center gap-2"
-            onClick={handleEditCustomer}
-          >
-            <Pencil1Icon className="h-4 w-4" /> Edit
-          </Button>
+          <div className="flex items-center gap-3">
+            {role && hasPermission("customers", "edit", role) && (
+              <Button
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={handleEditCustomer}
+              >
+                <Pencil1Icon className="h-4 w-4" /> Edit
+              </Button>
+            )}
 
-          <Button
-            variant="destructive"
-            className="flex items-center gap-2"
-            onClick={handleDeleteCustomer}
-          >
-            <TrashIcon className="h-4 w-4" />
-            Delete
-          </Button>
-        </div>
+            {role && hasPermission("customers", "delete", role) && (
+              <Button
+                variant="destructive"
+                className="flex items-center gap-2"
+                onClick={handleDeleteCustomer}
+              >
+                <TrashIcon className="h-4 w-4" />
+                Delete
+              </Button>
+            )}
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

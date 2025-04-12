@@ -29,6 +29,8 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
+import { useUserRole } from "@/hooks/use-get-role";
+import { hasPermission } from "@/utils/permissions";
 
 const CustomerPage = () => {
   const router = useRouter();
@@ -37,6 +39,7 @@ const CustomerPage = () => {
   const [sortBy, setSortBy] = useState("name");
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
   const { setTitle } = useHeader();
+  const role = useUserRole();
 
   useEffect(() => {
     setTitle(
@@ -50,7 +53,7 @@ const CustomerPage = () => {
     );
   }, []);
 
-  const { data, isLoading } = useGetAllCustomers(
+  const { data, isLoading, isError } = useGetAllCustomers(
     currentPage,
     parseInt(searchParams.get("limit") || "20", 10),
     searchQuery,
@@ -69,14 +72,16 @@ const CustomerPage = () => {
         <p className="h2 text-brand text-2xl font-semibold">
           View and manage your customers
         </p>
-        <Button
-          onClick={() => {
-            router.push("/customers/create");
-          }}
-        >
-          <PlusCircledIcon className="text-xl font-semibold" />
-          New Customer
-        </Button>
+        {role && hasPermission("customers", "create", role) && (
+          <Button
+            onClick={() => {
+              router.push("/customers/create");
+            }}
+          >
+            <PlusCircledIcon className="text-xl font-semibold" />
+            New Customer
+          </Button>
+        )}
       </div>
 
       <div className="flex flex-col space-y-4 md:flex-row md:items-end md:space-x-4 md:space-y-0">

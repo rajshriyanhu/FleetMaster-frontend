@@ -210,7 +210,7 @@ const ExpenseModal = ({
   console.log(document);
 
   return (
-    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen} modal={false}>
+    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
       <DialogContent className="w-full">
         <DialogHeader className="flex flex-col gap-3">
           <DialogTitle className="text-light-100 text-center">
