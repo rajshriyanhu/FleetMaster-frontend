@@ -1,3 +1,4 @@
+import { setStoredUser } from "@/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 
@@ -19,49 +20,10 @@ type SignUpSchema = {
 
 type AccessSchema = {
   userId: string,
-  // permissions: {
-  //   vehicle: {
-  //     read: boolean;
-  //     write: boolean;
-  //     update: boolean;
-  //     delete: boolean;
-  //   },
-  //   trip: {
-  //     read: boolean;
-  //     write: boolean;
-  //     update: boolean;
-  //     delete: boolean;
-  //   },
-  //   driver: {
-  //     read: boolean;
-  //     write: boolean;
-  //     update: boolean;
-  //     delete: boolean;
-  //   },
-  //   customer: {
-  //     read: boolean;
-  //     write: boolean;
-  //     update: boolean;
-  //     delete: boolean;
-  //   },
-  //   expense: {
-  //     read: boolean;
-  //     write: boolean;
-  //     update: boolean;
-  //     delete: boolean;
-  //   },
-  //   user : {
-  //     read: boolean;
-  //     write: boolean;
-  //     update: boolean;
-  //     delete: boolean;
-  //   }
-  // }
   role: "ADMIN" | "EDITOR" | "VIEWER" | "CREATOR"
 }
 
 export const useSignUp = () => {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (values: SignUpSchema) => {
       const response = await axios.post("/auth/signup", values);
@@ -72,7 +34,6 @@ export const useSignUp = () => {
 };
 
 export const useSignIn = () => {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (values: LoginSchema) => {
       const response = await axios.post("/auth/login", values);
@@ -83,7 +44,6 @@ export const useSignIn = () => {
 };
 
 export function useLogout() {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async () => {
       const response = await axios.post("/auth/logout");
@@ -125,7 +85,7 @@ export const useUpdateAccess = () => {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({queryKey: ['allUsers']})
+      queryClient.invalidateQueries({queryKey: ['allUsers']});
     }
   });
 };
