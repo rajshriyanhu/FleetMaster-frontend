@@ -95,6 +95,33 @@ const ExpenseModal = ({
   }, [expense, form]);
 
   const onSubmit = async (data: expenseFormType) => {
+    if (expense) {
+      const request: CreateExpenseRequest = {
+        file_url: expense.file_url,
+        description: data.description,
+        type: data.type,
+        amount: data.amount,
+        date: data.date,
+        vehicle_id: vehicle.id,
+        chassis_no: vehicle.chassis_no,
+      };
+      await updateExpense({ id: expense.id, values: request })
+        .then(() => {
+          toast({
+            title: "Expense details saved successfully",
+          });
+          setIsModalOpen(false);
+        })
+        .catch((err) => {
+          toast({
+            title: "Uh Oh! Something went wrong",
+            description: `Failed to update expense, ${err.message}`,
+            variant: "destructive",
+          });
+        });
+      return;
+    }
+
     if (!document) {
       return;
     }
@@ -120,23 +147,7 @@ const ExpenseModal = ({
       vehicle_id: vehicle.id,
       chassis_no: vehicle.chassis_no,
     };
-    if (expense) {
-      await updateExpense({ id: expense.id, values: request })
-        .then(() => {
-          toast({
-            title: "Expense details saved successfully",
-          });
-          setIsModalOpen(false);
-        })
-        .catch((err) => {
-          toast({
-            title: "Uh Oh! Something went wrong",
-            description: `Failed to update expense, ${err.message}`,
-            variant: "destructive",
-          });
-        });
-      return;
-    }
+
     await createExpense(request)
       .then(() => {
         toast({
@@ -206,8 +217,6 @@ const ExpenseModal = ({
         return;
       });
   };
-
-  console.log(document);
 
   return (
     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>

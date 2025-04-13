@@ -164,7 +164,7 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
   const onSubmit = async (data: DriverFormType) => {
     console.log(data);
     if (driver) {
-      updateDriver({ id: driver.id, values: data })
+      await updateDriver({ id: driver.id, values: data })
         .then(() => {
           toast({
             title: "Driver details saved successfully",
@@ -429,7 +429,7 @@ const DriverForm = ({ driver }: { driver?: Driver }) => {
             />
 
             {driver ? (
-              <div className="flex justify-between items-center px-2 border rounded-md gap-4 bg-white">
+              <div className="flex items-center justify-between h-10 mt-[27px] px-2 border rounded-md gap-4 bg-white">
                 <div>Document</div>
                 <div className="flex justify-between">
                   <Button

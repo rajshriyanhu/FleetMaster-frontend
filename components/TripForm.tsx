@@ -441,7 +441,7 @@ const TripForm = ({ trip }: { trip?: Trip }) => {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Select driver</FormLabel>
+                    <FormLabel>Select customer</FormLabel>
                     <FormControl>
                       <Select
                         onValueChange={field.onChange}

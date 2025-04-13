@@ -61,6 +61,7 @@ export function useUpdateExpense() {
     },
     onSuccess: (data, variables) => {
         queryClient.invalidateQueries({ queryKey: ["expense", variables.id] });
+        queryClient.invalidateQueries({ queryKey: ["allExpenses"] });
       },
   });
 }
