@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LogIn, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -10,13 +10,21 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "./ui/sidebar";
 import { useHeader } from "@/hooks/use-header";
 import { clearStoredUser, getStoredUser } from "@/utils";
+import { User } from "@/dto";
 
 const Header = () => {
   const router = useRouter();
   const { toast } = useToast();
   const { mutateAsync: logoutFn } = useLogout();
   const { title } = useHeader();
-  const user = getStoredUser();
+
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const storedUser = getStoredUser();
+    setUser(storedUser);
+  }, []);
+
   const handleLogout = () => {
     logoutFn()
       .then((res) => {

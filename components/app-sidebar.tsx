@@ -18,10 +18,16 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { getStoredUser } from "@/utils";
+import { User } from "@/dto";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
-  const user = getStoredUser();
+  const [user, setUser] = React.useState<User | null>(null);
+
+  React.useEffect(() => {
+    const storedUser = getStoredUser();
+    setUser(storedUser);
+  }, []);
   const router = useRouter();
   const getActiveClass = (url: string) => {
     const cleanPathname = pathname.split("?")[0];
