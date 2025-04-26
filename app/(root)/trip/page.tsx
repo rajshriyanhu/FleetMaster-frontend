@@ -90,7 +90,7 @@ const TripPage = () => {
           </label>
           <Input
             id="search-drivers"
-            placeholder="Search by name, email..."
+            placeholder="Search by location, driver's name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full md:w-[300px]"

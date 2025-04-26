@@ -72,7 +72,7 @@ const VehiclePage = () => {
             </label>
             <Input
               id="search-drivers"
-              placeholder="Search by name, email, phone..."
+              placeholder="Search by registration no..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full md:w-[300px]"

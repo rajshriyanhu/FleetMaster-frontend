@@ -28,7 +28,7 @@ export const useCreateTrip = () => {
 export function useGetAllTrips(page:number, limit:number,searchQuery:string, sortBy:string) {
   const debouncedSearchQuery = useDebounce(searchQuery, 300); 
   return useQuery({
-    queryKey: ["allTrips"],
+    queryKey: ["allTrips", limit, page, debouncedSearchQuery, sortBy],
     queryFn: async () => {
       const response = await axios.get(`/trip?page=${page}&limit=${limit}&search=${debouncedSearchQuery}&sortBy=${sortBy}`);
       return response.data;
